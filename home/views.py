@@ -78,8 +78,8 @@ def contact(request):
 def trainee_dashboard(request):
     return render(request, 'trainee/trainee_dashboard.html')
 
-def staff_dashboard(request):
-    return render(request, 'staff/staff_dashboard.html')
+# def staff_dashboard(request):
+#     return render(request, 'staff/staff_dashboard.html')
 
 def mailbox(request):
     return render(request, 'mailbox.html')
