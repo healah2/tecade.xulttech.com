@@ -1,0 +1,289 @@
+{% extends 'trainer/trainer_base.html' %}
+{% load static %}
+{% block title %}Tecade | Session Registration{% endblock %}
+
+
+{% block extra_styles %}
+<!-- Bootstrap -->
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+<!-- Font Awesome (CDN) -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<!-- Ionicons (CDN) -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+
+<!-- jvectormap -->
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+
+<!-- AdminLTE main CSS -->
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+
+<!-- AdminLTE Skins -->
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+
+<!-- HTML5 Shim and Respond.js IE8 support (Only works via HTTP, so CDN is fine) -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+{% endblock %}
+
+{% block content %}
+
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Upload Learning Plan
+        </h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- FORM BOX -->
+        <form method="post" action="{% url 'generate_learning_plan' %}">
+            {% csrf_token %}
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Generate Learning Plan</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div><!-- /.box-header -->
+
+                <div class="box-body">
+
+                    <!-- Top Details -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="unit_competence">Unit of Competence</label>
+                                <input type="text" name="unit_competence" id="unit_competence" class="form-control"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="unit_code">Unit Code</label>
+                                <input type="text" name="unit_code" id="unit_code" class="form-control" required>
+                            </div>
+                        </div>
+                    </div><!-- /.row -->
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="trainer_name">Name of Trainer</label>
+                                <input type="text" name="trainer_name" id="trainer_name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="course">Course</label>
+                                <input type="text" name="course" id="course" class="form-control" required>
+                            </div>
+                        </div>
+                    </div><!-- /.row -->
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="institution">Institution</label>
+                                <input type="text" name="institution" id="institution" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="level">Level</label>
+                                <input type="text" name="level" id="level" class="form-control"
+                                    placeholder="e.g. Level 6" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="trainees">Number of Trainees</label>
+                                <input type="number" name="trainees" id="trainees" class="form-control" required>
+                            </div>
+                        </div>
+                    </div><!-- /.row -->
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="class_name">Class</label>
+                                <input type="text" name="class_name" id="class_name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_preparation">Date of Preparation</label>
+                                <input type="date" name="date_preparation" id="date_preparation" class="form-control"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_revision">Date of Revision</label>
+                                <input type="date" name="date_revision" id="date_revision" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="term">Term</label>
+                                <input type="text" name="term" id="term" class="form-control"
+                                    placeholder="e.g. II /2025" required>
+                            </div>
+                        </div>
+                    </div><!-- /.row -->
+
+                    <!-- Time -->
+                    <div class="form-group">
+                        <label for="total_time">Total Time (Hours)</label>
+                        <input type="number" name="total_time" id="total_time" class="form-control" required>
+                    </div>
+
+                    <!-- Learning Outcomes -->
+                    <div class="form-group">
+                        <label>Learning Outcomes & Sessions</label>
+                        <div id="outcomes-wrapper">
+                            <div class="outcome-block">
+                                <input type="text" name="outcomes[0][title]" class="form-control"
+                                    placeholder="Learning Outcome Title (e.g. Install the Software)" required
+                                    style="margin-bottom:5px;">
+                                <textarea name="outcomes[0][expectations]" class="form-control" rows="3"
+                                    placeholder="Learning Expectations..." required></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="addOutcome()">+ Add Learning
+                            Outcome</button>
+                    </div>
+
+                </div><!-- /.box-body -->
+
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary">Generate Plan</button>
+                </div>
+            </div><!-- /.box -->
+        </form>
+
+    </section><!-- /.content -->
+
+    <script>
+        let outcomeCount = 1;
+        function addOutcome() {
+            const wrapper = document.getElementById('outcomes-wrapper');
+            const block = document.createElement('div');
+            block.classList.add('outcome-block');
+            block.style.marginTop = '10px';
+            block.innerHTML = `
+            <input type="text" name="outcomes[${outcomeCount}][title]" class="form-control" placeholder="Learning Outcome Title" required style="margin-bottom:5px;">
+            <textarea name="outcomes[${outcomeCount}][expectations]" class="form-control" rows="3" placeholder="Learning Expectations..." required></textarea>
+        `;
+            wrapper.appendChild(block);
+            outcomeCount++;
+        }
+    </script>
+
+</div><!-- /.content-wrapper -->
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- jQuery 2.1.4 -->
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<!-- Bootstrap 3.3.5 -->
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<!-- Select2 -->
+<script src="{% static 'plugins/select2/select2.full.min.js' %}"></script>
+<!-- InputMask -->
+<script src="{% static 'plugins/input-mask/jquery.inputmask.js' %}"></script>
+<script src="{% static 'plugins/input-mask/jquery.inputmask.date.extensions.js' %}"></script>
+<script src="{% static 'plugins/input-mask/jquery.inputmask.extensions.js' %}"></script>
+<!-- date-range-picker -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+<script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+<!-- bootstrap color picker -->
+<script src="{% static 'plugins/colorpicker/bootstrap-colorpicker.min.js' %}"></script>
+<!-- bootstrap time picker -->
+<script src="{% static 'plugins/timepicker/bootstrap-timepicker.min.js' %}"></script>
+<!-- SlimScroll 1.3.0 -->
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+<!-- iCheck 1.0.1 -->
+<script src="{% static 'plugins/iCheck/icheck.min.js' %}"></script>
+<!-- FastClick -->
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<!-- Page script -->
+<script>
+    $(function () {
+        //Initialize Select2 Elements
+        $(".select2").select2();
+
+        //Datemask dd/mm/yyyy
+        $("#datemask").inputmask("dd/mm/yyyy", { "placeholder": "dd/mm/yyyy" });
+        //Datemask2 mm/dd/yyyy
+        $("#datemask2").inputmask("mm/dd/yyyy", { "placeholder": "mm/dd/yyyy" });
+        //Money Euro
+        $("[data-mask]").inputmask();
+
+        //Date range picker
+        $('#reservation').daterangepicker();
+        //Date range picker with time picker
+        $('#reservationtime').daterangepicker({ timePicker: true, timePickerIncrement: 30, format: 'MM/DD/YYYY h:mm A' });
+        //Date range as a button
+        $('#daterange-btn').daterangepicker(
+            {
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                startDate: moment().subtract(29, 'days'),
+                endDate: moment()
+            },
+            function (start, end) {
+                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            }
+        );
+
+        //iCheck for checkbox and radio inputs
+        $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
+            checkboxClass: 'icheckbox_minimal-blue',
+            radioClass: 'iradio_minimal-blue'
+        });
+        //Red color scheme for iCheck
+        $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
+            checkboxClass: 'icheckbox_minimal-red',
+            radioClass: 'iradio_minimal-red'
+        });
+        //Flat red color scheme for iCheck
+        $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+            checkboxClass: 'icheckbox_flat-green',
+            radioClass: 'iradio_flat-green'
+        });
+
+        //Colorpicker
+        $(".my-colorpicker1").colorpicker();
+        //color picker with addon
+        $(".my-colorpicker2").colorpicker();
+
+        //Timepicker
+        $(".timepicker").timepicker({
+            showInputs: false
+        });
+    });
+</script>
+{% endblock %}

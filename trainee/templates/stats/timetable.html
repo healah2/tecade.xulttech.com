@@ -1,0 +1,346 @@
+{% extends 'trainee/trainee_main.html' %}
+{% load static %}
+
+{% block title %}My Timetable - TeCADE{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-bs3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+{% endblock %}
+
+{{ block.super }}
+<style>
+  .timetable-container {
+    max-width: 1200px; margin: 20px auto; padding: 20px; background:#fff;
+    border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  }
+  .current-session { background-color:#e6f7ff !important; border-left:4px solid #1890ff; }
+  .session-card { transition: all .3s; }
+  .session-card:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,.1); }
+  .session-badge { font-size:.8rem; padding:3px 8px; border-radius:4px; }
+  .theory-badge { background:#d4edda; color:#155724; }
+  .lab-badge { background:#cce5ff; color:#004085; }
+  .workshop-badge { background:#fff3cd; color:#856404; }
+  .industry-badge { background:#f8d7da; color:#721c24; }
+
+  /* small helper so “outline” buttons don’t look naked in BS3 */
+  .btn.btn-outline-primary { border:1px solid #3c8dbc; color:#3c8dbc; background:transparent; }
+  .btn.btn-outline-primary.active,
+  .btn.btn-outline-primary:active,
+  .btn.btn-outline-primary:focus { background:#3c8dbc; color:#fff; }
+
+  #notes-panel { display:none; }
+  #notes-panel .panel-body { padding:10px; }
+  #notes-text { width:100%; min-height:120px; }
+</style>
+
+{% block page_title %}My Timetable{% endblock %}
+{% block page_subtitle %}
+  {% if timetables %}{{ timetables.course.name }} ({{ timetables.level }}){% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'trainee:trainee_dashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+  <li class="active">Timetable</li>
+{% endblock %}
+
+{% block main_content %}
+<div class="timetable-container">
+  {% if error %}
+    <div class="alert alert-warning">{{ error }}</div>
+  {% elif not sessions_by_day %}
+    <div class="alert alert-info">No sessions scheduled for this week.</div>
+  {% else %}
+
+  <div class="clearfix" style="margin-bottom:15px;">
+    <h3 class="pull-left" style="margin-top:6px">{{ timetables.name }}</h3>
+    <div class="btn-group pull-right">
+      <button id="day-view-btn" class="btn btn-outline-primary active" type="button">Day View</button>
+      <button id="week-view-btn" class="btn btn-outline-primary" type="button">Week View</button>
+      <button id="notes-toggle-btn" class="btn btn-default" type="button" title="Toggle notes">
+        <i class="fa fa-sticky-note"></i> Notes
+      </button>
+    </div>
+  </div>
+
+  <!-- Notes Panel -->
+  <div id="notes-panel" class="panel panel-default">
+    <div class="panel-heading">
+      <strong>My Notes</strong>
+      <small class="text-muted"> (saved per day)</small>
+    </div>
+    <div class="panel-body">
+      <textarea id="notes-text" class="form-control" placeholder="Write notes for this day..."></textarea>
+      <div class="text-right" style="margin-top:8px;">
+        <button id="notes-clear" class="btn btn-default" type="button">Clear</button>
+        <button id="notes-save" class="btn btn-primary" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day View -->
+  <div id="day-view">
+    <div class="row" style="margin-bottom:10px;">
+      <div class="col-sm-6">
+        <select id="day-selector" class="form-control">
+          {% for day, _sessions in sessions_by_day.items %}
+            <option value="{{ forloop.counter0 }}">{{ day }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Session</th>
+            <th>Location</th>
+            <th>Trainer</th>
+            <th>Requirements</th>
+          </tr>
+        </thead>
+
+        {# One tbody per day -> show first, hide others #}
+        {% for day, day_sessions in sessions_by_day.items %}
+        <tbody class="day-tbody" data-index="{{ forloop.counter0 }}" data-day-label="{{ day }}"{% if not forloop.first %} style="display:none"{% endif %}>
+          {% for session in day_sessions %}
+          <tr class="{% if session.is_current %}current-session{% endif %}">
+            <td>{{ session.time_slot }}</td>
+            <td>
+              <strong>{{ session.title }}</strong>
+              <span class="badge 
+                {% if session.session_type == 'Theory' %}theory-badge
+                {% elif session.session_type == 'Lab' %}lab-badge
+                {% elif session.session_type == 'Workshop' %}workshop-badge
+                {% else %}industry-badge{% endif %}">
+                {{ session.session_type }}
+              </span>
+            </td>
+            <td>{{ session.location }}</td>
+            <td>{{ session.trainer }}</td>
+            <td>{% if session.requirements %}{{ session.requirements }}{% else %}-{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center">No sessions for this day</td></tr>
+          {% endfor %}
+        </tbody>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <!-- Week View -->
+  <div id="week-view" style="display:none;">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Time</th>
+            {% for day, sessions in sessions_by_day.items %}
+              <th>{{ day }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for time_slot in time_slots %}
+          <tr>
+            <td>{{ time_slot }}</td>
+            {% for day, day_sessions in sessions_by_day.items %}
+            <td>
+              {% for session in day_sessions %}
+                {% if session.time_slot == time_slot %}
+                <div class="session-card mb-2 p-2 rounded {% if session.is_current %}current-session{% endif %}">
+                  <div class="clearfix">
+                    <strong class="pull-left">{{ session.title }}</strong>
+                    <span class="badge pull-right
+                      {% if session.session_type == 'Theory' %}theory-badge
+                      {% elif session.session_type == 'Lab' %}lab-badge
+                      {% elif session.session_type == 'Workshop' %}workshop-badge
+                      {% else %}industry-badge{% endif %}">
+                      {{ session.session_type }}
+                    </span>
+                  </div>
+                  <div><small>{{ session.location }}</small></div>
+                  <div><small>Trainer: {{ session.trainer }}</small></div>
+                  {% if session.requirements %}
+                  <div class="mt-1"><small class="text-muted">Bring: {{ session.requirements }}</small></div>
+                  {% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<!-- Session Notification Modal -->
+<div class="modal fade" id="sessionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+        <h4 class="modal-title" id="sessionModalTitle">Session Notification</h4>
+      </div>
+      <div class="modal-body" id="sessionModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
+
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+<script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+<script src="{% static 'dist/js/pages/dashboard2.js' %}"></script>
+<script src="{% static 'dist/js/demo.js' %}"></script>
+
+<script>
+$(function () {
+
+  /* ===== View toggles (Day / Week / Notes) ===== */
+  $('#day-view-btn').on('click', function() {
+    $(this).addClass('active');
+    $('#week-view-btn').removeClass('active');
+    $('#day-view').show();
+    $('#week-view').hide();
+  });
+
+  $('#week-view-btn').on('click', function() {
+    $(this).addClass('active');
+    $('#day-view-btn').removeClass('active');
+    $('#day-view').hide();
+    $('#week-view').show();
+  });
+
+  $('#notes-toggle-btn').on('click', function() {
+    $('#notes-panel').slideToggle(150);
+  });
+
+  /* ===== Day selector switches between pre-rendered <tbody> blocks ===== */
+  function showDayByIndex(idx) {
+    $('.day-tbody').hide();
+    $('.day-tbody[data-index="' + idx + '"]').show();
+    // load notes for this day
+    loadNotes(idx);
+  }
+
+  $('#day-selector').on('change', function() {
+    var idx = $(this).val();
+    showDayByIndex(idx);
+  });
+
+  /* ===== Notes (saved per day, persisted in localStorage) ===== */
+  var notesKeyBase = 'timetableNotes:' + '{{ timetables.name|default_if_none:"" }}::{{ timetables.level|default_if_none:"" }}';
+
+  function dayKey(idx) { return notesKeyBase + '::' + idx; }
+
+  function loadNotes(idx) {
+    try {
+      var saved = localStorage.getItem(dayKey(idx));
+      $('#notes-text').val(saved || '');
+    } catch(e) { /* ignore storage errors */ }
+  }
+
+  function saveNotes(idx) {
+    try {
+      localStorage.setItem(dayKey(idx), $('#notes-text').val() || '');
+    } catch(e) {}
+  }
+
+  $('#notes-save').on('click', function() {
+    var idx = $('#day-selector').val();
+    saveNotes(idx);
+    // quick feedback
+    $('#notes-save').prop('disabled', true);
+    setTimeout(function(){ $('#notes-save').prop('disabled', false); }, 400);
+  });
+
+  $('#notes-clear').on('click', function() {
+    var idx = $('#day-selector').val();
+    $('#notes-text').val('');
+    saveNotes(idx);
+  });
+
+  // Auto-save after typing (debounced)
+  (function() {
+    var t=null;
+    $('#notes-text').on('input', function() {
+      if (t) clearTimeout(t);
+      var idx = $('#day-selector').val();
+      t = setTimeout(function(){ saveNotes(idx); }, 400);
+    });
+  })();
+
+  /* ===== Initialize: select “today” if present, else first day ===== */
+  function selectInitialDay() {
+    var todayName = (function(){
+      try {
+        return new Date().toLocaleDateString(undefined, { weekday:'long' });
+      } catch(e) { return null; }
+    })();
+
+    var chosenIndex = 0;
+
+    if (todayName) {
+      // Find the first option whose label starts with today's weekday (e.g., "Monday")
+      $('#day-selector option').each(function() {
+        var label = $(this).text().trim();
+        if (label.toLowerCase().indexOf(todayName.toLowerCase()) === 0) {
+          chosenIndex = $(this).val();
+          return false;
+        }
+      });
+    }
+
+    $('#day-selector').val(chosenIndex);
+    showDayByIndex(chosenIndex);
+  }
+
+  selectInitialDay();
+
+  /* ===== Simple notification if any current session exists ===== */
+  function checkSessions() {
+    var hasCurrent = $('.current-session').length > 0;
+    if (hasCurrent) {
+      $('#sessionModalTitle').text('Timetable Loaded');
+      $('#sessionModalBody').html('<p>Your weekly timetable is now available.</p>');
+      try {
+        $('#sessionModal').modal('show');
+        setTimeout(function(){ $('#sessionModal').modal('hide'); }, 5000);
+      } catch(e) {}
+    }
+  }
+  setTimeout(checkSessions, 800);
+
+});
+</script>
+{% endblock %}

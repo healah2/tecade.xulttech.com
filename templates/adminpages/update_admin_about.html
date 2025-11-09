@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update About</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary">Update About Content</h2>
+    <form method="POST" enctype="multipart/form-data" class="bg-light p-4 rounded shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" value="{{ about.title }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Paragraph 1</label>
+            <textarea name="paragraph1" class="form-control" rows="3">{{ about.paragraph1 }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Paragraph 2</label>
+            <textarea name="paragraph2" class="form-control" rows="3">{{ about.paragraph2 }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Paragraph 3</label>
+            <textarea name="paragraph3" class="form-control" rows="3">{{ about.paragraph3 }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Phone</label>
+            <input type="text" name="phone" class="form-control" value="{{ about.phone }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Image</label><br>
+            {% if about.image %}
+                <img src="{{ about.image.url }}" alt="Current Image" style="width: 120px; height: auto; margin-bottom: 10px;"><br>
+            {% endif %}
+            <input type="file" name="image" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'admin_about' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+</body>
+</html>

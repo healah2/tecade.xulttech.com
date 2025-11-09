@@ -1,0 +1,170 @@
+{% extends 'clientside/base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<!-- Google Web Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Icon Font Stylesheet -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Libraries Stylesheet -->
+<link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+<link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
+
+<!-- Customized Bootstrap Stylesheet -->
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+<!-- Template Stylesheet -->
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .form-header {
+        border-bottom: 2px solid #001f3f;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid bg-primary py-5 bg-header" style="margin-bottom: 90px;">
+    <div class="row py-5">
+        <div class="col-12 pt-lg-5 mt-lg-5 text-center">
+            <h1 class="display-4 text-white animated zoomIn">Edit Timetable</h1>
+        </div>
+    </div>
+</div>
+
+<div class="form-container">
+    <div class="form-header">
+        <h2 class="text-center" style="color: #001f3f;">Edit {{ timetable.name }}</h2>
+        <p class="text-center text-muted">Modify timetable details</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Timetable Name</label>
+                <input type="text" name="name" value="{{ form.name.value }}" class="form-control" required>
+                {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Course</label>
+                <select name="course" class="form-select" required>
+                    <option value="">Select Course</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" {% if form.course.value == course.id %}selected{% endif %}>
+                        {{ course.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if form.course.errors %}
+                <div class="text-danger">{{ form.course.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Level</label>
+                <input type="text" name="level" value="{{ form.level.value }}" class="form-control" required>
+                {% if form.level.errors %}
+                <div class="text-danger">{{ form.level.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Start Date</label>
+                <input type="date" name="start_date" value="{{ form.start_date.value|date:'Y-m-d' }}" class="form-control" required>
+                {% if form.start_date.errors %}
+                <div class="text-danger">{{ form.start_date.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">End Date</label>
+                <input type="date" name="end_date" value="{{ form.end_date.value|date:'Y-m-d' }}" class="form-control" required>
+                {% if form.end_date.errors %}
+                <div class="text-danger">{{ form.end_date.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'manage_timetable' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Timetables
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="background-color: #001f3f;">
+                        <i class="bi bi-check-circle"></i> Update Timetable
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'lib/wow/wow.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Template Javascript -->
+<script src="{% static 'js/main.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    // Form validation
+    $('form').submit(function(e) {
+        let isValid = true;
+        
+        // Check required fields
+        $('input[required], select[required]').each(function() {
+            if (!$(this).val().trim()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        // Date validation
+        const startDate = new Date($('input[name="start_date"]').val());
+        const endDate = new Date($('input[name="end_date"]').val());
+        
+        if (startDate && endDate && startDate > endDate) {
+            isValid = false;
+            $('input[name="end_date"]').addClass('is-invalid');
+            alert('End date cannot be before start date');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields correctly.');
+        }
+    });
+});
+</script>
+{% endblock %}

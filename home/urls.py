@@ -1,0 +1,81 @@
+from django.urls import path
+from . import views
+from django.conf import settings
+from django.conf.urls.static import static
+from finance import finance_global_views
+from . import home_global_views
+from trainer import trainer_global_views
+
+urlpatterns = [
+    path('',views.home,name='home'),
+    path('about/',views.about,name='about'),
+    path('contact/',views.contact,name='contact'),
+    # # path('trainee_dashboard/',views.trainee_dashboard,name='trainee_dashboard'),
+    path('staff_dashboard/',trainer_global_views.staff_dashboard,name='staff_dashboard'),
+    path('mailbox/',views.mailbox,name='mailbox'),
+    path('simple_tables/',views.simple_tables,name='simple_tables'),
+    path('data_tables/',views.data_tables,name='data_tables'),
+    # path('trainee_login/', views.trainee_login, name='trainee_login'),
+    # path('login/', views.login, name='login'),
+    path('academic_departments/', views.academic_departments, name='academic_departments'),
+    path('non_academic/', views.non_academic, name='non_academic'),
+    path('academic-department/<int:pk>/', views.academic_dpt_details, name='academic_dpt_details'),
+    path('non_academic-department/<int:pk>/', views.non_academic_details, name='non_academic_details'),
+    path('academic_courses/', views.academic_courses, name='academic_courses'),
+    path('bom/', views.bom, name='bom'),
+    path('institutional/', views.institutional, name='institutional'),
+    path('apply_levels/', views.apply_levels, name='apply_levels'),
+    path('apply_departments/', views.apply_departments, name='apply_departments'),
+    path('apply_courses/<int:pk>/', views.apply_courses, name='apply_courses'),
+    path('heads_of_departments/', views.heads_of_departments, name='heads_of_departments'),
+    path('admin_index/', views.admin_index, name='admin_index'),
+    path('admin_index/update/<int:pk>/', views.update_adminindex, name='update_adminindex'),
+    path('delete_slide/<int:slide_id>/', views.delete_slide, name='delete_slide'),
+    path('admin_about/', views.admin_about, name='admin_about'),
+    path('admin_about/update/<int:pk>/', views.update_admin_about, name='update_admin_about'),
+    path('admin_inst_mgt/', views.admin_inst_mgt, name='admin_inst_mgt'),
+    path('admin/update-manager/<int:manager_id>/', views.update_manager, name='update_manager'),
+    path('admin_bom/', views.admin_bom, name='admin_bom'),
+    path('admin_academic_departments/', views.admin_academic_departments, name='admin_academic_departments'),
+    path('admin_non_academic_departments/', views.admin_non_academic_departments, name='admin_non_academic_departments'),
+    path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('trainee_registration/', views.trainee_registration, name='trainee_registration'),
+    
+    path('all_trainees/', views.all_trainees, name='all_trainees'),
+    # path('trainee_profile/<int:trainee_id>/', views.trainee_profile, name='trainee_profile'),
+    path('trainee/<int:trainee_id>/profile/', views.trainee_profile, name='trainee_profile'),
+    path('edit_trainee/<int:trainee_id>/', views.edit_trainee, name='edit_trainee'),
+    path('get-courses/<int:dept_id>/', views.get_courses, name='get_courses'),
+    path('registrar_academics_dashboard/', views.registrar_academics_dashboard, name='registrar_academics_dashboard'),
+    path('dp_admin_dashboard/', views.dp_admin_dashboard, name='dp_admin_dashboard'),
+    path('dp_academics_dashboard/', views.dp_academics_dashboard, name='dp_academics_dashboard'),
+    path('admin_login/', home_global_views.admin_login_view, name='admin_login'),
+    path('admin_logout/', views.admin_logout, name='admin_logout'),
+    # path('dashboard/hod/', views.hod_dashboard_view, name='hod_dashboard'),
+    # path('dashboard/dp-academics/', views.dp_academics_dashboard_view, name='dp_academics_dashboard'),
+    path('api/gender-intake-data/', views.gender_by_intake_data, name='gender_by_intake_data'),
+    path('api/department-trainee-data/', views.department_trainee_data, name='department_trainee_data'),
+    path('api/trainee-progress-stats/', views.trainee_progress_stats_api, name='trainee_progress_stats_api'),
+    path('api/top-courses/', views.top_courses_api, name='top_courses_api'),
+    path('api/recent-trainees/', views.api_recent_trainees, name='api_recent_trainees'),
+    path('api/recent-courses/', views.recent_courses_api, name='recent_courses_api'),
+    path('api/total-trainees/', views.total_trainees_api, name='total_trainees_api'),
+    path('api/gender-intake-stats/', views.gender_intake_stats_api, name='gender_intake_stats_api'),
+    path('all_courses/', views.all_courses, name='all_courses'),
+    path('all_departments/', views.all_departments, name='all_departments'),
+    path('all_courses_dpac/', views.all_courses_dpac, name='all_courses_dpac'),
+    path('all_departments_dpac/', views.all_departments_dpac, name='all_departments_dpac'),
+    path('add_department/', views.add_department, name='add_department'),
+    path('add_course/', views.add_course, name='add_course'),
+    path('finance_dashboard/', finance_global_views.finance_dashboard, name='finance_dashboard'),
+    path('registrar_register_session/', views.registrar_register_session, name='registrar_register_session'),
+    path('create_current_session/', views.create_current_session, name='create_current_session'),
+    path('trainees_in_session/', views.trainees_in_session, name='trainees_in_session'),
+    path('total_trainees_in_session/', views.total_trainees_in_session, name='total_trainees_in_session'),
+ # <<Dp_Academics URLs>>
+    path('dp_academics_dashboard/', views.dp_academics_dashboard, name='dp_academics_dashboard'),
+    path('trainer_registration/', views.trainer_registration, name='trainer_registration'),
+    ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

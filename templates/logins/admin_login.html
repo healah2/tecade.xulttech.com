@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            width: 350px;
+        }
+        .login-box h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+        .login-box input,
+        .login-box select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background: #004085;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .login-box button:hover {
+            background: #003060;
+        }
+        .error {
+            color: red;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Admin Login</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="error">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Username</label>
+        <input type="text" name="username" required>
+
+        <label>Staff Number (Password)</label>
+        <input type="password" name="staff_number" required>
+
+        <label>Designation</label>
+        <select name="designation" required>
+            <option value="">-- Select Designation --</option>
+            <option value="Registrar Academics">Registrar Academics</option>
+            <option value="HOD">HOD</option>
+            <option value="DP Academics">DP Academics</option>
+            <option value="DP Admin">DP Admin</option>
+            <option value="Finance">Finance</option>
+            <!-- Add more roles as needed -->
+        </select>
+
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+</body>
+</html>

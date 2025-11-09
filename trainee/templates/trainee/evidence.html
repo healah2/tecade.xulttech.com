@@ -1,0 +1,495 @@
+{% extends 'trainee/portfolio.html' %}
+{% load static %}
+{% load custom_filters %}  
+
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-bs3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+
+<style>
+/* List view styles */
+#evidenceGrid.list-view {
+    display: block;
+}
+
+#evidenceGrid.list-view .col-md-4 {
+    width: 100%;
+    float: none;
+    margin-bottom: 15px;
+}
+
+#evidenceGrid.list-view .evidence-card {
+    display: flex;
+}
+
+#evidenceGrid.list-view .box-header {
+    flex: 1;
+}
+
+#evidenceGrid.list-view .box-body {
+    flex: 2;
+    display: flex;
+    align-items: center;
+}
+
+#evidenceGrid.list-view .box-footer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #evidenceGrid.list-view .evidence-card {
+        flex-direction: column;
+    }
+}
+
+/* Evidence type label colors */
+.label-document { background-color: #d9534f; }
+.label-image { background-color: #5cb85c; }
+.label-video { background-color: #f0ad4e; }
+.label-audio { background-color: #5bc0de; }
+.label-certificate { background-color: #337ab7; }
+.label-reflection { background-color: #6f42c1; }
+.label-feedback { background-color: #fd7e14; }
+.label-other { background-color: #6c757d; }
+</style>
+
+{% endblock %}
+
+
+{% block page_title %}Portfolio of Evidence{% endblock %}
+{% block page_subtitle %}
+  Document your learning journey with POEs and showcase your achievements
+{% endblock %}
+
+{{ block.super }}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'trainee:trainee_dashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+  <li class="active">Portfolio</li>
+{% endblock %}
+
+{% block portfolio_content %} 
+<div class="row">
+    <div class="col-md-3">
+        <!-- Filter Sidebar -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Filters</h3>
+                <div class="box-tools">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <!-- Search Form -->
+                <form method="get" action="{% url 'trainee:portfolio_evidence' %}">
+                    <div class="form-group">
+                        <label for="search">Search Evidence</label>
+                        <input type="text" class="form-control" id="search" name="q" 
+                               value="{{ search_query }}" placeholder="Search titles, descriptions...">
+                    </div>
+
+                    <!-- Evidence Type Filter -->
+                    <div class="form-group">
+                        <label for="evidence_type">Evidence Type</label>
+                        <select class="form-control" id="evidence_type" name="type">
+                            <option value="">All Types</option>
+                            {% for type_value, type_name in evidence_types %}
+                            <option value="{{ type_value }}" {% if current_type == type_value %}selected{% endif %}>
+                                {{ type_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Competency Filter -->
+                    <div class="form-group">
+                        <label for="competency">Competency</label>
+                        <select class="form-control" id="competency" name="competency">
+                            <option value="">All Competencies</option>
+                            {% for competency in competencies %}
+                            <option value="{{ competency.id }}" {% if current_competency == competency.id|stringformat:"s" %}selected{% endif %}>
+                                {{ competency.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Tag Filter (if you implement tags) -->
+                    <div class="form-group">
+                        <label for="tags">Tags</label>
+                        <input type="text" class="form-control" id="tags" name="tags" 
+                          placeholder="Filter by tags (comma separated)">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'trainee:portfolio_evidence' %}" class="btn btn-default btn-block">
+                        <i class="fa fa-times"></i> Clear Filters
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Upload Quick Action -->
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Quick Actions</h3>
+            </div>
+            <div class="box-body">
+                <a href="{% url 'trainee:portfolio_upload' %}" class="btn btn-success btn-block">
+                    <i class="fa fa-upload"></i> Upload New Evidence
+                </a>
+                <a href="{% url 'trainee:portfolio_reflections' %}" class="btn btn-info btn-block">
+                    <i class="fa fa-book"></i> Add Reflection
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Evidence Stats</h3>
+            </div>
+            <div class="box-body">
+                {% with total_count=page_obj.paginator.count %}
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>{{ total_count }}</h3>
+                        <p>Total Evidence Items</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-file"></i>
+                    </div>
+                </div>
+                {% endwith %}
+
+                <!-- Evidence Type Distribution -->
+                <h4>By Type</h4>
+                <ul class="list-group">
+                    {% for type_value, type_name in evidence_types %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ type_name }}
+                        <span class="badge bg-primary rounded-pill">
+                            {% comment %} You would need to calculate these counts in your view {% endcomment %}
+                            -
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <!-- Evidence Gallery Header -->
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">Evidence Gallery</h3>
+                <div class="box-tools">
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <input type="text" name="table_search" class="form-control pull-right" 
+                               placeholder="Quick search..." id="quickSearch">
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-default" id="quickSearchBtn">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <!-- View Toggle -->
+                <div class="btn-group" role="group" style="margin-bottom: 20px;">
+                    <button type="button" class="btn btn-default active" id="gridViewBtn">
+                        <i class="fa fa-th"></i> Grid View
+                    </button>
+                    <button type="button" class="btn btn-default" id="listViewBtn">
+                        <i class="fa fa-list"></i> List View
+                    </button>
+                </div>
+
+                <!-- Evidence Grid -->
+                <div class="row" id="evidenceGrid">
+                    {% for evidence in page_obj %}
+                    <div class="col-md-4 col-sm-6">
+                        <div class="box box-solid evidence-card">
+                            <div class="box-header with-border">
+                                <h3 class="box-title" style="font-size: 14px;">
+                                    {{ evidence.title|truncatewords:5 }}
+                                </h3>
+                                <div class="box-tools">
+                                    <span class="label label-{{ evidence.evidence_type }}">
+                                        {{ evidence.get_evidence_type_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="box-body" style="padding: 10px;">
+                                <!-- Evidence Thumbnail/Icon -->
+                                <div class="text-center" style="height: 120px; overflow: hidden;">
+                                    {% if evidence.evidence_type == 'image' and evidence.file %}
+                                    <img src="{{ evidence.file.url }}" 
+                                         alt="{{ evidence.title }}" 
+                                         style="max-height: 100px; max-width: 100%; object-fit: cover;">
+                                    {% elif evidence.evidence_type == 'document' %}
+                                    <i class="fa fa-file-pdf-o fa-3x text-danger"></i>
+                                    {% elif evidence.evidence_type == 'video' %}
+                                    <i class="fa fa-video-camera fa-3x text-warning"></i>
+                                    {% elif evidence.evidence_type == 'audio' %}
+                                    <i class="fa fa-music fa-3x text-info"></i>
+                                    {% else %}
+                                    <i class="fa fa-file-o fa-3x text-muted"></i>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Evidence Details -->
+                                <div style="margin-top: 10px;">
+                                    <p class="text-muted" style="font-size: 12px; height: 40px; overflow: hidden;">
+                                        {{ evidence.description|truncatewords:10|default:"No description" }}
+                                    </p>
+                                    
+                                    <!-- Competencies -->
+                                    {% if evidence.competencies.all %}
+                                    <div style="margin-bottom: 5px;">
+                                        {% for competency in evidence.competencies.all|slice:":2" %}
+                                        <span class="label label-default" style="font-size: 10px;">
+                                            {{ competency.name|truncatewords:2 }}
+                                        </span>
+                                        {% endfor %}
+                                        {% if evidence.competencies.all.count > 2 %}
+                                        <span class="label label-default" style="font-size: 10px;">
+                                            +{{ evidence.competencies.all.count|add:"-2" }} more
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Tags -->
+                                    {% if evidence.tags %}
+                                    <div style="margin-bottom: 5px;">
+                                        {% for tag in evidence.tags|split:","|slice:":3" %}
+                                        <span class="label label-primary" style="font-size: 10px;">
+                                            {{ tag|truncatewords:1 }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Upload Date -->
+                                    <small class="text-muted">
+                                        <i class="fa fa-clock-o"></i> 
+                                        {{ evidence.upload_date|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                                <div class="btn-group btn-group-justified">
+                                    <a href="#" class="btn btn-default btn-xs" data-toggle="modal" 
+                                       data-target="#evidenceModal{{ evidence.id }}">
+                                        <i class="fa fa-eye"></i> View
+                                    </a>
+                                    {% if evidence.file %}
+                                    <a href="{{ evidence.file.url }}" 
+                                       class="btn btn-default btn-xs" download>
+                                        <i class="fa fa-download"></i> Download
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evidence Modal -->
+                    <div class="modal fade" id="evidenceModal{{ evidence.id }}" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <h4 class="modal-title">{{ evidence.title }}</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            {% if evidence.evidence_type == 'image' and evidence.file %}
+                                            <img src="{{ evidence.file.url }}" 
+                                                 alt="{{ evidence.title }}" 
+                                                 style="max-width: 100%; height: auto;">
+                                            {% elif evidence.evidence_type == 'document' %}
+                                            <div class="text-center">
+                                                <i class="fa fa-file-pdf-o fa-5x text-danger"></i>
+                                                <p>Document: {{ evidence.get_file_extension|upper }} file</p>
+                                            </div>
+                                            {% elif evidence.evidence_type == 'video' %}
+                                            <div class="text-center">
+                                                <i class="fa fa-video-camera fa-5x text-warning"></i>
+                                                <p>Video file</p>
+                                            </div>
+                                            {% else %}
+                                            <div class="text-center">
+                                                <i class="fa fa-file-o fa-5x text-muted"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h5>Details</h5>
+                                            <p><strong>Type:</strong> {{ evidence.get_evidence_type_display }}</p>
+                                            <p><strong>Uploaded:</strong> {{ evidence.upload_date|date:"M d, Y" }}</p>
+                                            
+                                            {% if evidence.description %}
+                                            <h5>Description</h5>
+                                            <p>{{ evidence.description }}</p>
+                                            {% endif %}
+
+                                            {% if evidence.competencies.all %}
+                                            <h5>Competencies</h5>
+                                            <ul>
+                                                {% for competency in evidence.competencies.all %}
+                                                <li>{{ competency.name }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+
+                                            {% if evidence.tags %}
+                                            <h5>Tags</h5>
+                                            <p>
+                                                {% for tag in evidence.tags|split:"," %}
+                                                <span class="label label-primary">{{ tag }}</span>
+                                                {% endfor %}
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    {% if evidence.file %}
+                                    <a href="{{ evidence.file.url }}" class="btn btn-primary" download>
+                                        <i class="fa fa-download"></i> Download
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-md-12">
+                        <div class="box box-default">
+                            <div class="box-body text-center">
+                                <i class="fa fa-folder-open fa-4x text-muted" style="margin-bottom: 20px;"></i>
+                                <h3>No Evidence Found</h3>
+                                <p class="text-muted">
+                                    {% if search_query or current_type or current_competency %}
+                                    Try adjusting your filters or search terms.
+                                    {% else %}
+                                    You haven't uploaded any evidence yet.
+                                    {% endif %}
+                                </p>
+                                <a href="{% url 'trainee:portfolio_upload' %}" class="btn btn-primary">
+                                    <i class="fa fa-upload"></i> Upload Your First Evidence
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="text-center">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_competency %}&competency={{ current_competency }}{% endif %}">&laquo;</a></li>
+                        {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                        {% endif %}
+
+                        {% for i in page_obj.paginator.page_range %}
+                        {% if page_obj.number == i %}
+                        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                        <li><a href="?page={{ i }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_competency %}&competency={{ current_competency }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_competency %}&competency={{ current_competency }}{% endif %}">&raquo;</a></li>
+                        {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+<script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+<script src="{% static 'dist/js/pages/dashboard2.js' %}"></script>
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<script src="{% static 'plugins/dropzone/min/dropzone.min.js' %}"></script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function() {
+    // Quick search functionality
+    $('#quickSearchBtn').click(function() {
+        var searchTerm = $('#quickSearch').val();
+        if (searchTerm) {
+            window.location.href = '{% url "trainee:portfolio_evidence" %}?q=' + encodeURIComponent(searchTerm);
+        }
+    });
+
+    $('#quickSearch').keypress(function(e) {
+        if (e.which == 13) {
+            $('#quickSearchBtn').click();
+        }
+    });
+
+    // View toggle functionality
+    $('#gridViewBtn').click(function() {
+        $('#evidenceGrid').removeClass('list-view').addClass('row');
+        $(this).addClass('active');
+        $('#listViewBtn').removeClass('active');
+    });
+
+    $('#listViewBtn').click(function() {
+        $('#evidenceGrid').removeClass('row').addClass('list-view');
+        $(this).addClass('active');
+        $('#gridViewBtn').removeClass('active');
+    });
+
+    // Auto-submit filters when selection changes
+    $('#evidence_type, #competency').change(function() {
+        $(this).closest('form').submit();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,280 @@
+{% extends 'trainee/trainee_main.html' %}
+{% load static %}
+
+{% block title %}TeCADE - Portfolio of Evidence{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-bs3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+<style>
+.portfolio-container {
+    padding: 20px;
+}
+
+/* Simplified Cards */
+.competency-card {
+    border-left: 3px solid #3c8dbc;
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 2px;
+}
+.competency-card.competent { border-left-color: #00a65a; }
+.competency-card.in-progress { border-left-color: #f39c12; }
+.competency-card.under-review { border-left-color: #ff851b; }
+.competency-card.not-started { border-left-color: #d2d6de; }
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.status-competent { background-color: #00a65a; color: white; }
+.status-in-progress { background-color: #f39c12; color: #fff; }
+.status-under-review { background-color: #ff851b; color: #fff; }
+.status-not-started { background-color: #d2d6de; color: #666; }
+
+/* Evidence Cards */
+.evidence-card {
+    margin-bottom: 15px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 2px;
+}
+.evidence-thumbnail {
+    height: 140px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Progress Section at Top */
+.progress-section {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.progress-header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* Simplified Navigation */
+.portfolio-nav .nav-pills > li > a {
+    padding: 10px 15px;
+    border-left: 2px solid transparent;
+}
+.portfolio-nav .nav-pills > li.active > a {
+    border-left-color: #3c8dbc;
+    background-color: #f5f5f5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .portfolio-container {
+        padding: 10px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_title %}Portfolio of Evidence{% endblock %}
+{% block page_subtitle %}
+  Document your learning journey and showcase your achievements
+{% endblock %}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'trainee:trainee_dashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+  <li class="active">Portfolio</li>
+{% endblock %}
+
+{% block main_content %}
+<div class="portfolio-container">
+    <!-- Learning Progress Section at Top -->
+    <div class="progress-section">
+        <div class="progress-header">
+            <h3 style="margin: 0; display: inline-block;">Learning Progress</h3>
+            <div class="pull-right">
+                <a href="{% url 'trainee:portfolio_upload' %}" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus"></i> Add Evidence
+                </a>
+            </div>
+        </div>
+               
+        {% with total_count=page_obj.paginator.count %}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-blue"><i class="fa fa-file-o"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Evidence Items</span>
+                        <span class="info-box-number">{{ total_count|default:"0" }}</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {% widthratio evidence_count|default:0 50 100 %}%"></div>
+                        </div>
+                        <small class="text-muted">Target: 50 items</small>
+                    </div>
+                </div>
+            </div>
+        {% endwith %}
+        
+        {% with total_count=page_obj.paginator.count %}
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-green"><i class="fa fa-check-circle"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Skills/Units of Competency </span>
+                        <span class="info-box-number">{{ competent_count|default:"0" }}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-green" style="width: {% widthratio competent_count|default:0 20 100 %}%"></div>
+                        </div>
+                        <small class="text-muted">Target: 20 competencies</small>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-purple"><i class="fa fa-refresh"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Course Units in Progress</span>
+                        <span class="info-box-number">{{ in_progress_count|default:"0" }}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-purple" style="width: {% widthratio in_progress_count|default:0 15 100 %}%"></div>
+                        </div>
+                        <small class="text-muted">You are almost there, Keep working on these!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Portfolio Navigation -->
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Portfolio Navigation</h3>
+                </div>
+                <div class="box-body" style="padding: 0;">
+                    <ul class="nav nav-pills nav-stacked portfolio-nav">
+                        <li class="{% if request.resolver_match.url_name == 'portfolio_dashboard' %}active{% endif %}">
+                            <a href="{% url 'trainee:portfolio_dashboard' %}">
+                                <i class="fa fa-dashboard"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="{% if request.resolver_match.url_name == 'portfolio_evidence' %}active{% endif %}">
+                            <a href="{% url 'trainee:portfolio_evidence' %}">
+                                <i class="fa fa-file-text"></i> Evidence Gallery
+                            </a>
+                        </li>
+                        <li class="{% if request.resolver_match.url_name == 'portfolio_upload' %}active{% endif %}">
+                            <a href="{% url 'trainee:portfolio_upload' %}">
+                                <i class="fa fa-cloud-upload"></i> Upload Evidence
+                            </a>
+                        </li>
+                        <li class="{% if request.resolver_match.url_name == 'portfolio_reflections' %}active{% endif %}">
+                            <a href="{% url 'trainee:portfolio_reflections' %}">
+                                <i class="fa fa-book"></i> Reflections
+                            </a>
+                        </li>
+                        <li class="{% if request.resolver_match.url_name == 'portfolio_share' %}active{% endif %}">
+                            <a href="{% url 'trainee:portfolio_share' %}">
+                                <i class="fa fa-share-alt"></i> Share Portfolio
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Quick Actions</h3>
+                </div>
+                <div class="box-body">
+                    <a href="{% url 'trainee:portfolio_upload' %}" class="btn btn-primary btn-block">
+                        <i class="fa fa-plus"></i> Add Evidence
+                    </a>
+                    <a href="{% url 'trainee:portfolio_reflections' %}" class="btn btn-default btn-block">
+                        <i class="fa fa-pencil"></i> Write Reflection
+                    </a>
+                    <a href="{% url 'trainee:portfolio_share' %}" class="btn btn-info btn-block">
+                        <i class="fa fa-share"></i> Share Progress
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <!-- Main Content Area -->
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{% block portfolio_title %}Portfolio Overview{% endblock %}</h3>
+                    <div class="box-tools">
+                        {% block portfolio_actions %}{% endblock %}
+                    </div>
+                </div>
+                <div class="box-body">
+                    {% block portfolio_content %}
+                    <!-- Default content if no child template overrides -->
+                    <div class="text-center" style="padding: 40px 0;">
+                        <i class="fa fa-folder-open fa-4x text-muted" style="margin-bottom: 20px;"></i>
+                        <h3>Welcome to Your Portfolio</h3>
+                        <p class="text-muted">Select an option from the menu to view or manage your learning evidence.</p>
+                        <a href="{% url 'trainee:portfolio_upload' %}" class="btn btn-primary">
+                            <i class="fa fa-plus"></i> Upload Your First Evidence
+                        </a>
+                    </div>
+                    {% endblock %}
+                </div>
+                {% block portfolio_footer %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'plugins/dropzone/min/dropzone.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+<script src="{% static 'plugins/dropzone/min/dropzone.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+<script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+<script src="{% static 'dist/js/pages/dashboard2.js' %}"></script>
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Dropzone for file uploads
+    Dropzone.autoDiscover = false;
+    
+    // Initialize Select2 for any select elements
+    $('.select2').select2();
+});
+</script>
+{% endblock %}

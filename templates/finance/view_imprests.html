@@ -1,0 +1,167 @@
+{% extends 'finance/finance_base.html' %}
+{% load static %}
+{% block title %}Tecade | All Trainees{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Ionicons -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'plugins/datatables/dataTables.bootstrap.css' %}">
+<!-- Theme style -->
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+{% endblock %}
+{% block content %}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            View Imprests
+
+        </h1>
+
+    </section>
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+
+
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">All Imprests</h3>
+                    </div><!-- /.box-header -->
+                    <div class="box-body">
+                        <table id="example1" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Imprest Number</th>
+                                    <th>Name of Holder</th>
+                                    <th>Contact</th>
+                                    <th>Amount</th>
+                                    <th>Date Generated</th>
+                                    <th>Date Confirmed</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for imprest in imprests %}
+                                <tr>
+                                    <td>{{ imprest.imprest_number }}</td>
+                                    <td>{{ imprest.name_of_holder }}</td>
+                                    <td>{{ imprest.phone_number }}</td>
+                                    <td>{{ imprest.amount_generated }}</td>
+                                    <td>{{ imprest.date_generated|date:"d M Y" }}</td>
+                                    <td>
+                                        {% if imprest.date_confirmed %}
+                                        {{ imprest.date_confirmed|date:"Y-m-d H:i" }}
+                                        {% else %}
+                                        <span class="text-muted">Not confirmed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if imprest.status == "Paid" %}
+                                        <span class="badge badge-success">Paid</span>
+                                        {% else %}
+                                        <span class="badge badge-warning">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if imprest.status == "Unpaid" %}
+                                        <a href="{% url 'confirm_imprest' imprest.id %}" class="btn btn-sm btn-primary"
+                                            onclick="return confirm('Are you sure you want to confirm this imprest as Paid?');">
+                                            Confirm
+                                        </a>
+                                        {% else %}
+                                        <button class="btn btn-sm btn-secondary" disabled>Confirmed</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No imprests available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Imprest Number</th>
+                                    <th>Name of Holder</th>
+                                    <th>Contact</th>
+                                    <th>Amount</th>
+                                    <th>Date Generated</th>
+                                    <th>Date Confirmed</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div><!-- /.box-body -->
+                </div><!-- /.box -->
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{% endblock %}
+
+{% block extra_scripts %}
+
+<!-- jQuery 2.1.4 -->
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<!-- Bootstrap 3.3.5 -->
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<!-- DataTables -->
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables/dataTables.bootstrap.min.js' %}"></script>
+<!-- SlimScroll -->
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+<!-- FastClick -->
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<!-- page script -->
+<script>
+    $(function () {
+        $("#example1").DataTable();
+        $('#example2').DataTable({
+            "paging": true,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false
+        });
+    });
+</script>
+{% endblock %}

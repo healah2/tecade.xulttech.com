@@ -1,0 +1,353 @@
+{% extends 'dp_academics/dp_academics_base.html' %}
+{% load static %}
+{% block title %}Tecade | Registrar Dashboard{% endblock %}
+
+
+{% block extra_styles %}
+<!-- Bootstrap -->
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+<!-- Font Awesome (CDN) -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<!-- Ionicons (CDN) -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+
+<!-- jvectormap -->
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+
+<!-- AdminLTE main CSS -->
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+
+<!-- AdminLTE Skins -->
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+
+<!-- HTML5 Shim and Respond.js IE8 support (Only works via HTTP, so CDN is fine) -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Register New Trainer</h1>
+    </section>
+
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Trainer Information</h3>
+            </div>
+            <form method="POST" action="{% url 'trainer_registration' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="box-body">
+                    <div class="row">
+
+                        <!-- Personal Information -->
+                        <div class="col-md-4 form-group">
+                            <label>Passport Photo</label>
+                            <input type="file" class="form-control" name="passport_image" accept="image/*"
+                                onchange="previewPassport(this)" required>
+                            <img id="passportPreview" src="#" alt="Preview"
+                                style="margin-top:10px; max-width:100%; display:none; border:1px solid #ccc;" />
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            <label>First Name</label>
+                            <input type="text" class="form-control" name="first_name" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Middle Name</label>
+                            <input type="text" class="form-control" name="middle_name">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Last Name</label>
+                            <input type="text" class="form-control" name="last_name" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Gender</label>
+                            <select class="form-control" name="gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Age</label>
+                            <input type="number" class="form-control" name="age" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Date of Admission</label>
+                            <input type="date" class="form-control" name="date_of_admission" required>
+                        </div>
+
+                        <!-- Department -->
+                        <div class="col-md-6 form-group">
+                            <label>Department</label>
+                            <select class="form-control" name="department" id="department" required>
+                                <option value="" selected disabled>Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Course -->
+                        <!-- Courses -->
+                        <div class="col-md-6 form-group">
+                            <label>Course</label>
+                            <select class="form-control" id="course_select">
+                                <option value="" selected disabled>Select Course</option>
+                            </select>
+
+                            <!-- Display selected courses as tags -->
+                            <div id="selected_courses" style="margin-top:10px;"></div>
+
+                            <!-- Hidden input to send all selected courses -->
+                            <input type="hidden" name="courses" id="courses_input" required>
+                        </div>
+
+
+                        <!-- Academic Background -->
+                        <div class="col-md-12">
+                            <h4><strong>Academic Background</strong></h4>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>KCSE Index Number</label>
+                            <input type="text" class="form-control" name="kcse_index">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>KCSE Grade</label>
+                            <input type="text" class="form-control" name="kcse_grade">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>KCSE Year</label>
+                            <input type="number" class="form-control" name="kcse_year">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>KCPE Index Number</label>
+                            <input type="text" class="form-control" name="kcpe_index">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>KCPE Grade</label>
+                            <input type="text" class="form-control" name="kcpe_grade">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>KCPE Year</label>
+                            <input type="number" class="form-control" name="kcpe_year">
+                        </div>
+
+                        <!-- Residential Information -->
+                        <div class="col-md-12">
+                            <h4><strong>Residential Information</strong></h4>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>County</label>
+                            <input type="text" class="form-control" name="county">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Sub County</label>
+                            <input type="text" class="form-control" name="sub_county">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Division</label>
+                            <input type="text" class="form-control" name="division">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Location</label>
+                            <input type="text" class="form-control" name="location">
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="col-md-12">
+                            <h4><strong>Contact Information</strong></h4>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Phone Number</label>
+                            <input type="text" class="form-control" name="phone" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>ID Number</label>
+                            <input type="text" class="form-control" name="id_number" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+
+                        <!-- Parent/Guardian Information -->
+                        <div class="col-md-12">
+                            <h4><strong>Parent/Guardian Information</strong></h4>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Parent/Guardian Name</label>
+                            <input type="text" class="form-control" name="guardian_name" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Guardian Phone Number</label>
+                            <input type="text" class="form-control" name="guardian_phone" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Guardian ID Number</label>
+                            <input type="text" class="form-control" name="guardian_id" required>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary">Register Trainer</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+
+
+
+<!-- AJAX to dynamically populate courses -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deptSelect = document.getElementById("department");
+        const courseSelect = document.getElementById("course");
+
+        deptSelect.addEventListener("change", function () {
+            const deptId = this.value;
+            if (deptId) {
+                fetch(`/get-courses/${deptId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        courseSelect.innerHTML = '<option value="" selected disabled>Select Course</option>';
+                        data.forEach(course => {
+                            const option = document.createElement("option");
+                            option.value = course.id;
+                            option.textContent = course.name;
+                            courseSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    });
+</script>
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deptSelect = document.getElementById("department");
+        const courseSelect = document.getElementById("course_select");
+        const selectedContainer = document.getElementById("selected_courses");
+        const hiddenInput = document.getElementById("courses_input");
+
+        let selectedCourses = [];
+
+        // Populate courses when department changes
+        deptSelect.addEventListener("change", function () {
+            const deptId = this.value;
+            if (deptId) {
+                fetch(`/get-courses/${deptId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        courseSelect.innerHTML = '<option value="" selected disabled>Select Course</option>';
+                        data.forEach(course => {
+                            const option = document.createElement("option");
+                            option.value = course.id;
+                            option.textContent = course.name;
+                            courseSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+
+        // Add course on selection
+        courseSelect.addEventListener("change", function () {
+            const courseId = this.value;
+            const courseName = this.options[this.selectedIndex].text;
+
+            if (!selectedCourses.some(c => c.id === courseId)) {
+                selectedCourses.push({ id: courseId, name: courseName });
+
+                // Display as a tag
+                const tag = document.createElement("span");
+                tag.textContent = courseName + " ×";
+                tag.dataset.id = courseId;
+                tag.style.margin = "2px 5px";
+                tag.style.padding = "2px 6px";
+                tag.style.backgroundColor = "#d9edf7";
+                tag.style.borderRadius = "3px";
+                tag.style.cursor = "pointer";
+                selectedContainer.appendChild(tag);
+
+                // Remove tag on click
+                tag.addEventListener("click", function () {
+                    selectedCourses = selectedCourses.filter(c => c.id !== courseId);
+                    tag.remove();
+                    updateHiddenInput();
+                });
+
+                updateHiddenInput();
+            }
+
+            // Reset select to placeholder
+            this.value = "";
+        });
+
+        function updateHiddenInput() {
+            hiddenInput.value = selectedCourses.map(c => c.id).join(",");
+        }
+    });
+</script>
+<!-- jQuery 2.1.4 -->
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+
+<!-- Bootstrap 3.3.5 -->
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+<!-- FastClick -->
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+
+<!-- Sparkline -->
+<script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+
+<!-- jvectormap -->
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+
+<!-- SlimScroll 1.3.0 -->
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+
+<!-- ChartJS 1.0.1 -->
+<script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+
+<!-- AdminLTE dashboard demo (dashboard2.js) -->
+<script src="{% static 'dist/js/pages/dashboard2.js' %}"></script>
+
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+
+<script>
+    function previewPassport(input) {
+        const preview = document.getElementById('passportPreview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '#';
+            preview.style.display = 'none';
+        }
+    }
+</script>
+
+{% endblock %}

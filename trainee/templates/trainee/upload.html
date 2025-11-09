@@ -1,0 +1,545 @@
+{% extends 'trainee/portfolio.html' %}
+{% load static %}
+
+{% block title %}TeCADE - Upload Evidence{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-bs3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+<!-- Bootstrap CSS -->
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Dropzone CSS -->
+{% comment %} <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" /> {% endcomment %}
+<link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
+<style>
+    .upload-container {
+        padding: 20px;
+    }
+    .upload-dropzone {
+        border: 3px dashed #3c8dbc;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .upload-dropzone:hover {
+        background: #e3f2fd;
+        border-color: #2196f3;
+    }
+    .upload-dropzone.dz-drag-hover {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        transform: scale(1.02);
+    }
+    
+    .file-preview {
+        margin-top: 20px;
+    }
+    .preview-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+    }
+    .preview-icon {
+        font-size: 2rem;
+        margin-right: 15px;
+        min-width: 40px;
+    }
+    .preview-info {
+        flex: 1;
+    }
+    .preview-actions {
+        margin-left: 15px;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .upload-progress {
+        margin-top: 10px;
+    }
+    .upload-status {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        display: none;
+    }
+    .status-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .status-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .status-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+</style>
+{% endblock %}
+
+    {% block portfolio_content %} 
+    <div class="container-fluid upload-container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="m-0"><i class="fas fa-cloud-upload-alt me-2"></i>Upload New Evidence</h3>
+                        <div class="box-tools">
+                            <a href="#" class="btn btn-default btn-sm">
+                                <i class="fa fa-arrow-left"></i> Back to Gallery
+                            </a>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <!-- Upload Status Messages -->
+                        <div id="uploadStatus" class="upload-status"></div>
+
+                        <!-- Upload Dropzone -->
+                        <div id="uploadDropzone" class="upload-dropzone">
+                            <div class="upload-icon">
+                                <i class="fa fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3>Drag & Drop Files Here</h3>
+                            <p class="text-muted">or click to browse your files</p>
+                            <p class="help-text">
+                                Supported formats: PDF, JPG, PNG, MP4, MP3, DOC, DOCX<br>
+                                Maximum file size: 2MB
+                            </p>
+                        </div>
+
+                        <!-- File Preview Area -->
+                        <div id="filePreview" class="file-preview" style="display: none;">
+                            <h4>Selected Files</h4>
+                            <div id="previewContainer"></div>
+                        </div>
+
+                        <!-- Upload Form -->
+                        <form id="uploadForm" method="post" enctype="multipart/form-data">
+                            <!-- Evidence Details -->
+                            <div class="form-group mb-3">
+                                <label for="title" class="required-field">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" required 
+                                       placeholder="Enter a descriptive title for your evidence">
+                                <p class="help-text">e.g., "Project Report - Phase 1", "Practical Demonstration Video"</p>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="description">Description</label>
+                                <textarea class="form-control" id="description" name="description" 
+                                          rows="4" placeholder="Describe what this evidence demonstrates..."></textarea>
+                                <p class="help-text">Explain the context, purpose, and what skills this evidence demonstrates.</p>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="evidence_type" class="required-field">Evidence Type</label>
+                                        <select class="form-control" id="evidence_type" name="evidence_type" required>
+                                            <option value="">Select Type</option>
+                                            <option value="document">Document</option>
+                                            <option value="image">Image</option>
+                                            <option value="video">Video</option>
+                                            <option value="audio">Audio</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="date_created">Date Created</label>
+                                        <input type="date" class="form-control" id="date_created" name="date_created"
+                                               value="2023-07-15">
+                                        <p class="help-text">When was this evidence originally created?</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="competencies">Related Competencies</label>
+                                <select class="form-control" id="competencies" name="competencies" multiple
+                                        style="width: 100%;" data-placeholder="Select relevant competencies">
+                                    <option value="1">Web Development</option>
+                                    <option value="2">Data Analysis</option>
+                                    <option value="3">Graphic Design</option>
+                                    <option value="4">Project Management</option>
+                                    <option value="5">Digital Marketing</option>
+                                </select>
+                                <p class="help-text">Select all competencies that this evidence demonstrates.</p>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="tags">Tags</label>
+                                <input type="text" class="form-control" id="tags" name="tags" 
+                                       placeholder="e.g., project, team-work, technical-skills">
+                                <p class="help-text">Comma-separated tags to help organize your evidence.</p>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label for="location">Location (Optional)</label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       placeholder="Where was this evidence created?">
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="form-group upload-progress" style="display: none;">
+                                <label>Upload Progress</label>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%">
+                                        <span class="sr-only">0% Complete</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa fa-upload"></i> Upload Evidence
+                                </button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Upload Guidelines -->
+                <div class="box guidelines-box">
+                    <div class="box-header">
+                        <h3 class="m-0"><i class="fas fa-info-circle me-2"></i>Upload Guidelines</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="alert alert-info">
+                            <h4><i class="fa fa-lightbulb"></i> Tips for Effective Evidence</h4>
+                            <ul class="mb-0">
+                                <li>Choose evidence that clearly demonstrates your skills</li>
+                                <li>Provide clear descriptions and context</li>
+                                <li>Tag relevant competencies accurately</li>
+                                <li>Use descriptive titles that are easy to search</li>
+                            </ul>
+                        </div>
+
+                        <h4>Supported File Types</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fa fa-file-pdf text-danger me-2"></i> PDF Documents</li>
+                            <li><i class="fa fa-file-image text-success me-2"></i> Images (JPG, PNG, GIF)</li>
+                            <li><i class="fa fa-file-video text-warning me-2"></i> Videos (MP4, MOV)</li>
+                            <li><i class="fa fa-file-audio text-info me-2"></i> Audio (MP3, WAV)</li>
+                            <li><i class="fa fa-file-word text-primary me-2"></i> Documents (DOC, DOCX)</li>
+                            <li><i class="fa fa-file-excel text-success me-2"></i> Spreadsheets (XLS, XLSX)</li>
+                        </ul>
+
+                        <h4>File Size Limits</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fa fa-file me-2"></i> Documents: Up to 20MB</li>
+                            <li><i class="fa fa-image me-2"></i> Images: Up to 10MB each</li>
+                            <li><i class="fa fa-video me-2"></i> Videos: Up to 50MB each</li>
+                            <li><i class="fa fa-music me-2"></i> Audio: Up to 30MB each</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Recent Uploads -->
+                <div class="box recent-uploads-box">
+                    <div class="box-header">
+                        <h3 class="m-0"><i class="fas fa-history me-2"></i>Your Recent Uploads</h3>
+                    </div>
+                    <div class="box-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Project Report</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            Document • 2 days ago
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-primary">D</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Website Screenshot</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            Image • 1 week ago
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-success">I</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Presentation Demo</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            Video • 2 weeks ago
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-warning">V</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="box-footer text-center pt-3">
+                        <a href="#" class="btn btn-default btn-sm">
+                            View All Evidence
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
+
+    {% block extra_scripts %}
+    <script src="{% static 'plugins/dropzone/min/dropzone.min.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.full.min.js' %}"></script>
+    <script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+    <script src="{% static 'dist/js/app.min.js' %}"></script>
+    <script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+    <script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+    <script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+    <script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+    <script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+    <script src="{% static 'dist/js/pages/dashboard2.js' %}"></script>
+    <script src="{% static 'dist/js/demo.js' %}"></script>
+    {% comment %} <script src="{% static 'plugins/dropzone/min/dropzone.min.js' %}"></script> {% endcomment %}
+    <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dropzone JS -->
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+
+    <script>
+    $(document).ready(function() {
+        // Initialize Dropzone
+        Dropzone.autoDiscover = false;
+        
+        // Store the dropzone instance in a global variable for access in other functions
+        window.myDropzone = new Dropzone("#uploadDropzone", {
+            url: "{% url 'trainee:portfolio_upload' %}", // This would be your Django upload URL
+            paramName: "file",
+            maxFilesize: 2, // MB
+            maxFiles: 5,
+            acceptedFiles: ".pdf,.jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.doc,.docx,.xls,.xlsx",
+            addRemoveLinks: false,
+            dictDefaultMessage: "<i class='fa fa-cloud-upload-alt fa-3x'></i><h3>Drag & Drop Files Here</h3>",
+            dictFallbackMessage: "Your browser doesn't support drag and drop file uploads.",
+            dictFallbackText: "Please use the fallback form below to upload your files.",
+            dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
+            dictInvalidFileType: "You can't upload files of this type.",
+            dictResponseError: "Server responded with {{statusCode}} code.",
+            dictCancelUpload: "Cancel upload",
+            dictCancelUploadConfirmation: "Are you sure you want to cancel this upload?",
+            dictRemoveFile: "Remove",
+            dictMaxFilesExceeded: "You can only upload up to 5 files.",
+            autoProcessQueue: false,
+            parallelUploads: 1,
+            uploadMultiple: false,
+            createImageThumbnails: true,
+            maxThumbnailFilesize: 10,
+            thumbnailWidth: 120,
+            thumbnailHeight: 120,
+            headers: {
+           'X-CSRFToken': '{{ csrf_token }}'
+            },            
+            
+            init: function() {
+                this.on("addedfile", function(file) {
+                    // Show preview area
+                    $('#filePreview').show();
+                    
+                    // Create preview item
+                    const previewItem = `
+                        <div class="preview-item" data-file-name="${file.name}">
+                            <div class="preview-icon">
+                                <i class="fa fa-file"></i>
+                            </div>
+                            <div class="preview-info">
+                                <strong>${file.name}</strong>
+                                <br>
+                                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                            </div>
+                            <div class="preview-actions">
+                                <button type="button" class="btn btn-danger btn-sm remove-file" data-file-name="${file.name}">
+                                    <i class="fa fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    $('#previewContainer').append(previewItem);
+                    
+                    // Add click event for the remove button
+                    $('.remove-file').off('click').on('click', function() {
+                        const fileName = $(this).data('file-name');
+                        removeFile(fileName);
+                    });
+                });
+                
+                this.on("removedfile", function(file) {
+                    // Remove preview item
+                    $(`.preview-item[data-file-name="${file.name}"]`).remove();
+                    
+                    // Hide preview area if no files
+                    if (this.files.length === 0) {
+                        $('#filePreview').hide();
+                    }
+                });
+                
+                this.on("sending", function(file, xhr, formData) {
+                    // Add form data to the upload
+                    formData.append("title", $('#title').val());
+                    formData.append("description", $('#description').val());
+                    formData.append("evidence_type", $('#evidence_type').val());
+                    formData.append("competencies", $('#competencies').val());
+                    formData.append("tags", $('#tags').val());
+                    formData.append("date_created", $('#date_created').val());
+                    formData.append("location", $('#location').val());
+                    
+                    // Show progress bar
+                    $('.upload-progress').show();
+                });
+                
+                this.on("uploadprogress", function(file, progress, bytesSent) {
+                    // Update progress bar
+                    $('.progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+                });
+                
+                this.on("success", function(file, response) {
+                    showStatus('success', 'Evidence uploaded successfully!');
+                    
+                    // Clear the dropzone
+                    this.removeAllFiles(true);
+                    
+                    // Reset form
+                    $('#uploadForm')[0].reset();
+                    
+                    // Hide preview area
+                    $('#filePreview').hide();
+                    
+                    // Hide progress bar
+                    $('.upload-progress').hide();
+                });
+                
+                this.on("error", function(file, errorMessage) {
+                    let message = "Upload failed";
+                    if (typeof errorMessage === 'string') {
+                        message += ": " + errorMessage;
+                    } else if (errorMessage.message) {
+                        message += ": " + errorMessage.message;
+                    } else if (errorMessage.xhr && errorMessage.xhr.responseText) {
+                        try {
+                            const response = JSON.parse(errorMessage.xhr.responseText);
+                            message += ": " + (response.error || response.message || "Unknown error");
+                        } catch (e) {
+                            message += ": " + errorMessage.xhr.responseText;
+                        }
+                    }
+                    showStatus('error', message);
+                    
+                    // Remove the file from dropzone
+                    this.removeFile(file);
+                });
+                
+                this.on("complete", function(file) {
+                    if (!file.accepted) {
+                        this.removeFile(file);
+                    }
+                });
+            }
+        });
+
+        // Handle traditional form submission
+        $('#uploadForm').on('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Validate required fields
+            if (!$('#title').val()) {
+                showStatus('warning', 'Please enter a title for your evidence.');
+                return false;
+            }
+            
+            if (!$('#evidence_type').val()) {
+                showStatus('warning', 'Please select an evidence type.');
+                return false;
+            }
+            
+            if (myDropzone.files.length === 0) {
+                showStatus('warning', 'Please select at least one file to upload.');
+                return false;
+            }
+            
+            // Process the queue
+            myDropzone.processQueue();
+        });
+
+        // Click handler for dropzone
+        $('#uploadDropzone').on('click', function() {
+            // Programmatically trigger the hidden file input
+            $('#fileInput').click();
+        });
+    });
+
+    function removeFile(fileName) {
+        // Find and remove the file from Dropzone
+        const files = myDropzone.files;
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].name === fileName) {
+                myDropzone.removeFile(files[i]);
+                break;
+            }
+        }
+    }
+
+    function showStatus(type, message) {
+        const statusDiv = $('#uploadStatus');
+        statusDiv.removeClass('status-success status-error status-warning')
+                 .addClass('status-' + type)
+                 .html('<i class="fa ' + (type === 'success' ? 'fa-check' : (type === 'error' ? 'fa-times' : 'fa-exclamation-triangle')) + ' me-2"></i> ' + message)
+                 .show();
+        
+        // Auto hide after 5 seconds
+        setTimeout(function() {
+            statusDiv.fadeOut();
+        }, 10000);
+    }
+    </script>
+{% endblock %}

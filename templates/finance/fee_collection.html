@@ -1,0 +1,746 @@
+{% extends 'finance/finance_base.html' %}
+{% load static %}
+{% block title %}Tecade | Finance Dashboard{% endblock %}
+
+{% block extra_styles %}
+<!-- Bootstrap -->
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+<!-- Font Awesome (CDN) -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<!-- Ionicons (CDN) -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+
+<!-- jvectormap -->
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+
+<!-- AdminLTE main CSS -->
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+
+<!-- AdminLTE Skins -->
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<style>
+    .chart-container {
+        width: 100%;
+        max-width: 900px;
+        /* Optional: limit width */
+        height: 400px;
+
+
+        background-color: white;
+        padding-bottom: 2%;
+        margin-bottom: 3%;
+    }
+</style>
+
+
+<!-- HTML5 Shim and Respond.js IE8 support (Only works via HTTP, so CDN is fine) -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+{% endblock %}
+
+{% block content %}
+
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Dashboard
+            <small>Version 2.0</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Dashboard</li>
+        </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- Info boxes -->
+        <div class="row">
+
+            <!-- Total Fees Account Balance -->
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-green"><i class="fa fa-bank"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Fees Account Balance</span>
+                        <span class="info-box-number">KES 3,320,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Fee Debts -->
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-red"><i class="fa fa-credit-card"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Fee Debts</span>
+                        <span class="info-box-number">KES 1,240,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Termly Fee Collected -->
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-aqua"><i class="fa fa-calendar"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Termly Fee Collected</span>
+                        <span class="info-box-number">KES 560,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yearly Fee Collected -->
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-yellow"><i class="fa fa-calendar-check-o"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Yearly Fee Collected</span>
+                        <span class="info-box-number">KES 4,560,000</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- /.row -->
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Fees Collection</h3>
+
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                    class="fa fa-minus"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fa fa-wrench"></i></button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="#">Action</a></li>
+                                    <li><a href="#">Another action</a></li>
+                                    <li><a href="#">Something else here</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="#">Separated link</a></li>
+                                </ul>
+                            </div>
+                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i
+                                    class="fa fa-times"></i></button>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Collect Fee Payment</h3>
+                                    </div>
+                                    {% if messages %}
+                                    <div id="messages-container"
+                                        style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
+                                        {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags }} alert-dismissible">
+                                            <button type="button" class="close" data-dismiss="alert"
+                                                aria-hidden="true">&times;</button>
+                                            {{ message }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <script>
+                                        window.addEventListener('DOMContentLoaded', (event) => {
+                                            const messages = document.querySelectorAll('#messages-container .alert');
+                                            messages.forEach((msg) => {
+                                                setTimeout(() => {
+                                                    // Bootstrap fade out
+                                                    $(msg).fadeOut('slow', function () {
+                                                        msg.remove();
+                                                    });
+                                                }, 3000); // 3000 ms = 3 seconds
+                                            });
+                                        });
+                                    </script>
+
+
+                                    <!-- /.box-header -->
+                                    <!-- form start -->
+                                    <form role="form" method="POST" action="{% url 'collect_fee' %}">
+                                        {% csrf_token %}
+                                        <div class="box-body">
+
+                                            <!-- Trainee Number -->
+                                            <div class="form-group">
+                                                <label for="trainee_number">Trainee Number</label>
+                                                <input type="text" class="form-control" id="trainee_number"
+                                                    name="trainee_number" placeholder="Enter Trainee Number" required>
+                                            </div>
+
+                                            <!-- Trainee Info Display -->
+                                            <div id="trainee-info" style="margin-bottom:15px;"></div>
+
+                                            <!-- Item of Payment -->
+                                            <div class="form-group">
+                                                <label for="item_of_payment">Item of Payment</label>
+                                                <select class="form-control" id="item_of_payment" name="item_of_payment"
+                                                    required>
+                                                    <option value="tuition">Tuition Fee</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Amount Paid -->
+                                            <div class="form-group">
+                                                <label for="amount_paid">Amount Paid</label>
+                                                <input type="number" class="form-control" id="amount_paid"
+                                                    name="amount_paid" placeholder="Enter Amount" required>
+                                            </div>
+
+                                            <!-- Mode of Payment -->
+                                            <div class="form-group">
+                                                <label for="mode_of_payment">Mode of Payment</label>
+                                                <select class="form-control" id="mode_of_payment" name="mode_of_payment"
+                                                    required>
+                                                    <option value="mpesa">Mpesa</option>
+                                                    <option value="bank">Bank Account</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Transaction ID -->
+                                            <div class="form-group">
+                                                <label for="transaction_id">Transaction ID</label>
+                                                <input type="text" class="form-control" id="transaction_id"
+                                                    name="transaction_id" placeholder="Enter Transaction ID" required>
+                                            </div>
+
+                                        </div>
+                                        <!-- /.box-body -->
+
+                                        <div class="box-footer">
+                                            <button type="submit" class="btn btn-primary"><i class="fa fa-money"></i>
+                                                Collect Payment</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <!-- /.box -->
+                            </div>
+                        </div>
+                        <script>
+                            const traineeInput = document.getElementById('trainee_number');
+                            const infoDiv = document.getElementById('trainee-info');
+
+                            traineeInput.addEventListener('blur', function () {
+                                const trainee_number = this.value;
+                                if (!trainee_number) return;
+
+                                fetch('/finance/get_trainee_info/?trainee_number=' + trainee_number)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            infoDiv.innerHTML = `<span class="text-danger">${data.error}</span>`;
+                                            document.getElementById('amount_paid').disabled = true;
+                                        } else {
+                                            infoDiv.innerHTML = `
+                                                <p><strong>Name:</strong> ${data.name}</p>
+                                                <p><strong>Session:</strong> ${data.session}</p>
+                                                <p><strong>Balance:</strong> KES ${data.balance}</p>
+                                            `;
+                                            document.getElementById('amount_paid').disabled = false;
+                                        }
+                                    });
+                            });
+                        </script>
+
+                        <!-- /.row -->
+                    </div>
+                    <!-- ./box-body -->
+
+
+                    <!-- /.box-footer -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <div class="col-md-12">
+
+                <!-- TABLE: LATEST ORDERS -->
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Latest Orders</h3>
+
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                    class="fa fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i
+                                    class="fa fa-times"></i></button>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="table-responsive">
+                            <table class="table no-margin">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Item</th>
+                                        <th>Status</th>
+                                        <th>Popularity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR9842</a></td>
+                                        <td>Call of Duty IV</td>
+                                        <td><span class="label label-success">Shipped</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#00a65a" data-height="20">
+                                                90,80,90,-70,61,-83,63</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR1848</a></td>
+                                        <td>Samsung Smart TV</td>
+                                        <td><span class="label label-warning">Pending</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#f39c12" data-height="20">
+                                                90,80,-90,70,61,-83,68</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR7429</a></td>
+                                        <td>iPhone 6 Plus</td>
+                                        <td><span class="label label-danger">Delivered</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#f56954" data-height="20">
+                                                90,-80,90,70,-61,83,63</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR7429</a></td>
+                                        <td>Samsung Smart TV</td>
+                                        <td><span class="label label-info">Processing</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#00c0ef" data-height="20">
+                                                90,80,-90,70,-61,83,63</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR1848</a></td>
+                                        <td>Samsung Smart TV</td>
+                                        <td><span class="label label-warning">Pending</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#f39c12" data-height="20">
+                                                90,80,-90,70,61,-83,68</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR7429</a></td>
+                                        <td>iPhone 6 Plus</td>
+                                        <td><span class="label label-danger">Delivered</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#f56954" data-height="20">
+                                                90,-80,90,70,-61,83,63</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="pages/examples/invoice.html">OR9842</a></td>
+                                        <td>Call of Duty IV</td>
+                                        <td><span class="label label-success">Shipped</span></td>
+                                        <td>
+                                            <div class="sparkbar" data-color="#00a65a" data-height="20">
+                                                90,80,90,-70,61,-83,63</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.table-responsive -->
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="box-footer clearfix">
+                        <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New Order</a>
+                        <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All
+                            Orders</a>
+                    </div>
+                    <!-- /.box-footer -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+
+
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </section>
+    <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('stackedBarChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Department A', 'Department B', 'Department C'],
+            datasets: [
+                {
+                    label: 'Expenditure',
+                    data: [20000, 25000, 30000],
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                },
+                {
+                    label: 'Remaining Balance',
+                    data: [40000, 15000, 20000],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Let it fill parent container height
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Department Funds Usage'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return context.dataset.label + ': Ksh ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return 'Ksh ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<!-- jQuery 2.1.4 -->
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+
+<!-- Bootstrap 3.3.5 -->
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+<!-- FastClick -->
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+
+<!-- Sparkline -->
+<script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+
+<!-- jvectormap -->
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+
+<!-- SlimScroll 1.3.0 -->
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+
+<!-- ChartJS 1.0.1 -->
+<script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+
+<!-- AdminLTE dashboard demo (dashboard2.js) -->
+<!-- <script src="{% static 'dist/js/pages/dashboard2.js' %}"></script> -->
+
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<script>
+    $(function () {
+
+        'use strict';
+
+        /* ChartJS
+         * -------
+         * Here we will create a few charts using ChartJS
+         */
+
+        //-----------------------
+        // - CASH IN VS CASH OUT PER -
+        // -------------------------------
+
+        // Get context with jQuery - using jQuery's .get() method.
+        var salesChartCanvas = $("#salesChart").get(0).getContext("2d");
+
+        // Create the chart instance using Chart.js v1.x syntax
+        var salesChart = new Chart(salesChartCanvas);
+
+        // Data: Cash in vs cash out per year
+        var salesChartData = {
+            labels: ["January", "February", "March", "April", "May"],
+            datasets: [
+                {
+                    label: "YEARLY CASH IN",
+                    fillColor: "rgba(60,141,188,0.9)",
+                    strokeColor: "rgba(60,141,188,0.8)",
+                    pointColor: "#3b8bba",
+                    pointStrokeColor: "rgba(60,141,188,1)",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(60,141,188,1)",
+                    data: [3000, 5000, 4000, 6000, 4500]  // Example data
+                },
+                {
+                    label: "YEARLY CASH OUT",
+                    fillColor: "rgba(210, 214, 222, 0.9)",
+                    strokeColor: "rgba(210, 214, 222, 0.8)",
+                    pointColor: "#c1c7d1",
+                    pointStrokeColor: "rgba(210,214,222,1)",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(220,220,220,1)",
+                    data: [2400, 4500, 3500, 5500, 4000]  // Example data
+                }
+            ]
+        };
+
+        var salesChartOptions = {
+            showScale: true,
+            scaleShowGridLines: false,
+            scaleGridLineColor: "rgba(0,0,0,.05)",
+            scaleGridLineWidth: 1,
+            scaleShowHorizontalLines: true,
+            scaleShowVerticalLines: true,
+            bezierCurve: true,
+            bezierCurveTension: 0.3,
+            pointDot: false,
+            pointDotRadius: 4,
+            pointDotStrokeWidth: 1,
+            pointHitDetectionRadius: 20,
+            datasetStroke: true,
+            datasetStrokeWidth: 2,
+            datasetFill: true,
+
+            maintainAspectRatio: true,
+            responsive: true
+        };
+
+        // Render the chart
+        salesChart.Line(salesChartData, salesChartOptions);
+
+        // -------------------------------
+        // - END STUDENT INTAKE CHART -
+        // -------------------------------
+
+
+        //-------------
+        //- PIE CHART -
+        //-------------
+        // Amount allocated per department.
+        var pieChartCanvas = $("#pieChart").get(0).getContext("2d");
+        var pieChart = new Chart(pieChartCanvas);
+        var PieData = [
+            {
+                value: 700000,
+                color: "#f56954",
+                highlight: "#f56954",
+                label: "Computing And Informatics (CI)"
+            },
+            {
+                value: 500000,
+                color: "#00a65a",
+                highlight: "#00a65a",
+                label: "Internet Engineering (IE)"
+            },
+            {
+                value: 400000,
+                color: "#f39c12",
+                highlight: "#f39c12",
+                label: "Engineering (EN)"
+            },
+            {
+                value: 600000,
+                color: "#00c0ef",
+                highlight: "#00c0ef",
+                label: "Hospitaility And Institutional Management (HIM)"
+            },
+            {
+                value: 300000,
+                color: "#3c8dbc",
+                highlight: "#3c8dbc",
+                label: "Agriculture (AGR)"
+            },
+            {
+                value: 100000,
+                color: "#d2d6de",
+                highlight: "#d2d6de",
+                label: "Building Technology (BTC)"
+            }
+        ];
+        var pieOptions = {
+            //Boolean - Whether we should show a stroke on each segment
+            segmentShowStroke: true,
+            //String - The colour of each segment stroke
+            segmentStrokeColor: "#fff",
+            //Number - The width of each segment stroke
+            segmentStrokeWidth: 1,
+            //Number - The percentage of the chart that we cut out of the middle
+            percentageInnerCutout: 50, // This is 0 for Pie charts
+            //Number - Amount of animation steps
+            animationSteps: 100,
+            //String - Animation easing effect
+            animationEasing: "easeOutBounce",
+            //Boolean - Whether we animate the rotation of the Doughnut
+            animateRotate: true,
+            //Boolean - Whether we animate scaling the Doughnut from the centre
+            animateScale: false,
+            //Boolean - whether to make the chart responsive to window resizing
+            responsive: true,
+            // Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
+            maintainAspectRatio: false,
+            //String - A legend template
+
+            //String - A tooltip template
+            tooltipTemplate: "<%=label%>, <%=value %>"
+        };
+        //Create pie or douhnut chart
+        // You can switch between pie and douhnut using the method below.
+        pieChart.Doughnut(PieData, pieOptions);
+        //-----------------
+        //- END PIE CHART -
+        //-----------------
+
+        /* jVector Maps
+         * ------------
+         * Create a world map with markers
+         */
+        $('#world-map-markers').vectorMap({
+            map: 'world_mill_en',
+            normalizeFunction: 'polynomial',
+            hoverOpacity: 0.7,
+            hoverColor: false,
+            backgroundColor: 'transparent',
+            regionStyle: {
+                initial: {
+                    fill: 'rgba(210, 214, 222, 1)',
+                    "fill-opacity": 1,
+                    stroke: 'none',
+                    "stroke-width": 0,
+                    "stroke-opacity": 1
+                },
+                hover: {
+                    "fill-opacity": 0.7,
+                    cursor: 'pointer'
+                },
+                selected: {
+                    fill: 'yellow'
+                },
+                selectedHover: {
+                }
+            },
+            markerStyle: {
+                initial: {
+                    fill: '#00a65a',
+                    stroke: '#111'
+                }
+            },
+            markers: [
+                { latLng: [41.90, 12.45], name: 'Vatican City' },
+                { latLng: [43.73, 7.41], name: 'Monaco' },
+                { latLng: [-0.52, 166.93], name: 'Nauru' },
+                { latLng: [-8.51, 179.21], name: 'Tuvalu' },
+                { latLng: [43.93, 12.46], name: 'San Marino' },
+                { latLng: [47.14, 9.52], name: 'Liechtenstein' },
+                { latLng: [7.11, 171.06], name: 'Marshall Islands' },
+                { latLng: [17.3, -62.73], name: 'Saint Kitts and Nevis' },
+                { latLng: [3.2, 73.22], name: 'Maldives' },
+                { latLng: [35.88, 14.5], name: 'Malta' },
+                { latLng: [12.05, -61.75], name: 'Grenada' },
+                { latLng: [13.16, -61.23], name: 'Saint Vincent and the Grenadines' },
+                { latLng: [13.16, -59.55], name: 'Barbados' },
+                { latLng: [17.11, -61.85], name: 'Antigua and Barbuda' },
+                { latLng: [-4.61, 55.45], name: 'Seychelles' },
+                { latLng: [7.35, 134.46], name: 'Palau' },
+                { latLng: [42.5, 1.51], name: 'Andorra' },
+                { latLng: [14.01, -60.98], name: 'Saint Lucia' },
+                { latLng: [6.91, 158.18], name: 'Federated States of Micronesia' },
+                { latLng: [1.3, 103.8], name: 'Singapore' },
+                { latLng: [1.46, 173.03], name: 'Kiribati' },
+                { latLng: [-21.13, -175.2], name: 'Tonga' },
+                { latLng: [15.3, -61.38], name: 'Dominica' },
+                { latLng: [-20.2, 57.5], name: 'Mauritius' },
+                { latLng: [26.02, 50.55], name: 'Bahrain' },
+                { latLng: [0.33, 6.73], name: 'São Tomé and Príncipe' }
+            ]
+        });
+
+        /* SPARKLINE CHARTS
+         * ----------------
+         * Create a inline charts with spark line
+         */
+
+        //-----------------
+        //- SPARKLINE BAR -
+        //-----------------
+        $('.sparkbar').each(function () {
+            var $this = $(this);
+            $this.sparkline('html', {
+                type: 'bar',
+                height: $this.data('height') ? $this.data('height') : '30',
+                barColor: $this.data('color')
+            });
+        });
+
+        //-----------------
+        //- SPARKLINE PIE -
+        //-----------------
+        $('.sparkpie').each(function () {
+            var $this = $(this);
+            $this.sparkline('html', {
+                type: 'pie',
+                height: $this.data('height') ? $this.data('height') : '90',
+                sliceColors: $this.data('color')
+            });
+        });
+
+        //------------------
+        //- SPARKLINE LINE -
+        //------------------
+        $('.sparkline').each(function () {
+            var $this = $(this);
+            $this.sparkline('html', {
+                type: 'line',
+                height: $this.data('height') ? $this.data('height') : '90',
+                width: '100%',
+                lineColor: $this.data('linecolor'),
+                fillColor: $this.data('fillcolor'),
+                spotColor: $this.data('spotcolor')
+            });
+        });
+    });
+
+</script>
+
+
+{% endblock %}

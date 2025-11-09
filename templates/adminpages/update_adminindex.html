@@ -1,0 +1,26 @@
+<div style="max-width: 800px; margin: auto; background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; color: navy;">Update Admin Index Content</h2>
+    <form method="POST" enctype="multipart/form-data" style="margin-top: 30px;">
+        {% csrf_token %}
+
+        <h4 style="color: navy;">Facts Section</h4>
+
+        <div style="margin-bottom: 15px;">
+            <label>Partner Institutions</label>
+            <input type="number" name="partners" value="{{ admin_data.num_institutions }}" class="form-control" required>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Trainees Managed</label>
+            <input type="number" name="trainees" value="{{ admin_data.num_trainees }}" class="form-control" required>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label>Trainers Engaged</label>
+            <input type="number" name="trainers" value="{{ admin_data.num_trainers }}" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Update</button>
+        <a href="{% url 'admin_index' %}" class="btn btn-secondary mt-3 w-100">Back to Admin Index</a>
+    </form>
+</div>

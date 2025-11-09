@@ -1,0 +1,645 @@
+{% extends 'trainee/portfolio.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-bs3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+<!-- Add Select2 CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dropzone JS -->
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+
+
+<link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+<style>
+    .reflection-form {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .reflection-item {
+        border-left: 4px solid #007bff;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: white;
+    }
+    .unit-badge {
+        background: #28a745;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+    .term-badge {
+        background: #6c757d;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+    .form-group.required label:after {
+        content: " *";
+        color: #dc3545;
+    }
+    .reflection-grid {
+        display: none;
+    }
+    .reflection-grid .reflection-item {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 10px;
+        padding: 15px;
+        height: 300px;
+        overflow: hidden;
+    }
+    .reflection-content-preview {
+        max-height: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .evidence-link {
+        cursor: pointer;
+        text-decoration: underline;
+        color: #007bff;
+    }
+    .evidence-link:hover {
+        color: #0056b3;
+    }
+    .view-toggle {
+        margin-bottom: 15px;
+    }
+    .hidden-reflection {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block title %}TeCADE - Reflections{% endblock %}
+
+{% block portfolio_content %}
+<!-- Add this at the top to display messages -->
+{% if messages %}
+<div class="row">
+    <div class="col-md-12">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Reflection Creation Form -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Write New Reflection</h3>
+            </div>
+            <div class="box-body">
+                <form method="post" action="{% url 'trainee:portfolio_reflections' %}" id="reflectionForm">
+                    {% csrf_token %}
+                    
+                    <!-- Form validation errors -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Please correct the errors below:</strong>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group required">
+                        <label for="reflection_title">Title</label>
+                        <input type="text" class="form-control" id="reflection_title" name="title" 
+                               placeholder="What are you reflecting on?" required
+                               value="{{ form.title.value|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group required">
+                        <label for="reflection_content">Reflection</label>
+                        <textarea class="form-control" id="reflection_content" name="content" rows="6" 
+                                  placeholder="Describe your learning experience, challenges, insights, and growth..." 
+                                  required>{{ form.content.value|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="unit_name">Unit/Course Name</label>
+                                <input type="text" class="form-control" id="unit_name" name="unit_name" 
+                                       placeholder="e.g., Software Engineering" 
+                                       value="{{ form.unit_name.value|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="unit_code">Unit Code</label>
+                                <input type="text" class="form-control" id="unit_code" name="unit_code" 
+                                       placeholder="e.g., CS401" 
+                                       value="{{ form.unit_code.value|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="term_select">Term/Semester</label>
+                                <select class="form-control" id="term_select" name="term">
+                                    <option value="">Select term...</option>
+                                    {% for value, label in term_choices %}
+                                    <option value="{{ value }}" 
+                                            {% if form.term.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="assessment_type">Assessment Type</label>
+                                <select class="form-control" id="assessment_type" name="assessment_type">
+                                    <option value="">Select type...</option>
+                                    {% for value, label in assessment_choices %}
+                                    <option value="{{ value }}" 
+                                            {% if form.assessment_type.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fixed: Properly structured evidence selection -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="related_evidence">Link to Evidence (Optional)</label>
+                                <select class="form-control select2" id="related_evidence" name="related_evidence" multiple style="width: 100%;">
+                                    <option value="">Select evidence...</option>
+                                    {% for evidence in recent_evidence %}
+                                    <option value="{{ evidence.id }}" 
+                                            {% if evidence.id in form.related_evidence.value %}selected{% endif %}>
+                                        {{ evidence.title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple evidence items</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa fa-save"></i> Save Reflection
+                            </button>
+                            <button type="reset" class="btn btn-default">
+                                <i class="fa fa-refresh"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Existing Reflections List -->
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">My Reflections</h3>
+                <div class="box-tools">
+                    <div class="input-group" style="width: 200px;">
+                        <input type="text" id="reflectionSearch" class="form-control input-sm" placeholder="Search reflections...">
+                        <div class="input-group-btn">
+                            <button class="btn btn-sm btn-default" type="button">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <!-- View Toggle Buttons -->
+                <div class="view-toggle text-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default btn-sm active" data-view="list">
+                            <i class="fa fa-list"></i> List View
+                        </button>
+                        <button type="button" class="btn btn-default btn-sm" data-view="grid">
+                            <i class="fa fa-th"></i> Grid View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div id="reflectionListView">
+                    {% if page_obj.object_list %}
+                        {% for reflection in page_obj.object_list %}
+                        <div class="reflection-item {% if forloop.counter > 2 %}hidden-reflection{% endif %}" 
+                             data-unit-name="{{ reflection.unit_name|default:''|lower }}" 
+                             data-unit-code="{{ reflection.unit_code|default:''|lower }}"
+                             data-evidence="{% for evidence in reflection.related_evidence.all %}{{ evidence.title|lower }} {% endfor %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h4 style="margin-top: 0;">{{ reflection.title }}</h4>
+                                <div>
+                                    {% if reflection.unit_name or reflection.unit_code %}
+                                    <span class="unit-badge">
+                                        {% if reflection.unit_code %}{{ reflection.unit_code }}{% endif %}
+                                        {% if reflection.unit_name and reflection.unit_code %} - {% endif %}
+                                        {% if reflection.unit_name %}{{ reflection.unit_name }}{% endif %}
+                                    </span>
+                                    {% endif %}
+                                    {% if reflection.term %}
+                                    <span class="term-badge">{{ reflection.get_term_display }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="text-muted small mb-2">
+                                <i class="fa fa-calendar"></i> {{ reflection.date|date:"F j, Y" }} 
+                                {% if reflection.assessment_type %}
+                                • <i class="fa fa-tag"></i> {{ reflection.get_assessment_type_display }}
+                                {% endif %}
+                            </div>
+                            
+                            <p>{{ reflection.content|linebreaksbr }}</p>
+                            
+                            {% if reflection.related_evidence.all %}
+                            <div class="mt-3">
+                                <strong>Linked Evidence:</strong>
+                                {% for evidence in reflection.related_evidence.all %}
+                                <span class="label label-info evidence-link" style="margin-right: 5px;" 
+                                      data-evidence-id="{{ evidence.id }}">
+                                    <i class="fa fa-file"></i> {{ evidence.title }}
+                                </span>
+                                {% comment %} <a href="#" class="btn btn-default btn-xs" data-toggle="modal" 
+                                       data-target="#evidenceModal{{ evidence.id }}">View</a>    {% endcomment %}
+                                       
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <a href="{% url 'trainee:edit_reflection' reflection.id %}" class="btn btn-default btn-xs">
+                                    <i class="fa fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-danger btn-xs delete-reflection" 
+                                        data-reflection-id="{{ reflection.id }}"
+                                        data-reflection-title="{{ reflection.title }}">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if not forloop.last and forloop.counter < 3 %}
+                        <hr class="visible-reflection-separator">
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- View All Button (only show if there are more than 2 reflections) -->
+                        {% if page_obj.object_list|length > 2 %}
+                        <div class="text-center mt-3">
+                            <button id="viewAllReflections" class="btn btn-primary btn-sm">
+                                View All Reflections
+                            </button>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center" style="padding: 40px 0;">
+                            <i class="fa fa-book fa-4x text-muted" style="margin-bottom: 20px;"></i>
+                            <h3>No Reflections Yet</h3>
+                            <p class="text-muted">Start writing your first reflection above to document your learning journey!</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Grid View -->
+                <div id="reflectionGridView" class="reflection-grid row">
+                    {% if page_obj.object_list %}
+                        {% for reflection in page_obj.object_list %}
+                        <div class="col-md-6 reflection-item" 
+                             data-unit-name="{{ reflection.unit_name|default:''|lower }}" 
+                             data-unit-code="{{ reflection.unit_code|default:''|lower }}"
+                             data-evidence="{% for evidence in reflection.related_evidence.all %}{{ evidence.title|lower }} {% endfor %}">
+                            <h5 style="margin-top: 0;">{{ reflection.title }}</h5>
+                            
+                            <div class="text-muted small mb-2">
+                                <i class="fa fa-calendar"></i> {{ reflection.date|date:"M j, Y" }}
+                            </div>
+                            
+                            <div class="mb-2">
+                                {% if reflection.unit_name or reflection.unit_code %}
+                                <span class="unit-badge">
+                                    {% if reflection.unit_code %}{{ reflection.unit_code }}{% endif %}
+                                </span>
+                                {% endif %}
+                                {% if reflection.term %}
+                                <span class="term-badge">{{ reflection.get_term_display }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="reflection-content-preview">
+                                {{ reflection.content|truncatewords:30|linebreaksbr }}
+                            </div>
+                            
+                            {% if reflection.related_evidence.all %}
+                            <div class="mt-2">
+                                <strong>Evidence:</strong>
+                                {% for evidence in reflection.related_evidence.all %}
+                                <br><small class="evidence-link" data-evidence-id="{{ evidence.id }}">
+                                    <i class="fa fa-file"></i> {{ evidence.title }}
+                                </small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <a href="{% url 'trainee:edit_reflection' reflection.id %}" class="btn btn-default btn-xs">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger btn-xs delete-reflection" 
+                                        data-reflection-id="{{ reflection.id }}"
+                                        data-reflection-title="{{ reflection.title }}">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Reflection Statistics by Unit -->
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Reflections by Unit</h3>
+                <div class="box-tools">
+                    <div class="input-group" style="width: 150px;">
+                        <input type="text" id="unitSearch" class="form-control input-sm" placeholder="Search units...">
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <div id="unitStatsContainer">
+                    {% if reflection_stats.units %}
+                        {% for unit in reflection_stats.units %}
+                        <div class="info-box unit-stat-item {% if forloop.first %}default-unit{% else %}hidden-unit{% endif %}" 
+                             data-unit-name="{{ unit.unit_name|default:''|lower }}">
+                            <span class="info-box-icon bg-green"><i class="fa fa-book"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">{{ unit.unit_name }}</span>
+                                <span class="info-box-number">{{ unit.reflection_count }} reflection{{ unit.reflection_count|pluralize }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No reflection data available</p>
+                    {% endif %}
+                </div>
+                <div id="noUnitsMessage" style="display: none;">
+                    <p class="text-muted text-center">No units found</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reflection Prompts -->
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Reflection Prompts</h3>
+            </div>
+            <div class="box-body">
+                <div class="alert alert-info">
+                    <h5><i class="fa fa-lightbulb-o"></i> Need inspiration?</h5>
+                    <ul class="list-unstyled">
+                        <li>• What was the most challenging concept this week?</li>
+                        <li>• How did you apply theory to practice?</li>
+                        <li>• What would you do differently next time?</li>
+                        <li>• How does this connect to your career goals?</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/select2/select2.full.min.js' %}"></script>
+{% comment %} <script src=></script> {% endcomment %}
+
+<script>
+$(document).ready(function() {
+    // Initialize select2 for evidence selection
+    $('.select2').select2({
+        placeholder: "Select evidence to link...",
+        allowClear: true,
+        width: 'resolve'
+    });
+
+    // Reflection Search Functionality
+    $('#reflectionSearch').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase().trim();
+        
+        $('.reflection-item').each(function() {
+            const unitName = $(this).data('unit-name') || '';
+            const unitCode = $(this).data('unit-code') || '';
+            const evidence = $(this).data('evidence') || '';
+            const title = $(this).find('h4, h5').text().toLowerCase();
+            const content = $(this).find('p').text().toLowerCase();
+            
+            const matchesSearch = searchTerm === '' || 
+                unitName.includes(searchTerm) ||
+                unitCode.includes(searchTerm) ||
+                evidence.includes(searchTerm) ||
+                title.includes(searchTerm) ||
+                content.includes(searchTerm);
+                
+            $(this).toggle(matchesSearch);
+        });
+
+        // Update separators
+        updateReflectionSeparators();
+    });
+
+    // Unit Search Functionality
+    $('#unitSearch').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase().trim();
+        let foundUnits = false;
+        
+        $('.unit-stat-item').each(function() {
+            const unitName = $(this).data('unit-name') || '';
+            const matchesSearch = searchTerm === '' || unitName.includes(searchTerm);
+            
+            $(this).toggle(matchesSearch);
+            if (matchesSearch) foundUnits = true;
+        });
+
+        // Show/hide no units message
+        $('#noUnitsMessage').toggle(!foundUnits);
+    });
+
+    // View All Reflections functionality
+    $('#viewAllReflections').on('click', function() {
+        $('.hidden-reflection').slideDown();
+        $('.visible-reflection-separator').remove();
+        $(this).hide();
+    });
+
+    // View Toggle functionality
+    $('[data-view]').on('click', function() {
+        const viewType = $(this).data('view');
+        
+        // Update active button
+        $('[data-view]').removeClass('active');
+        $(this).addClass('active');
+        
+        // Show/hide views
+        if (viewType === 'list') {
+            $('#reflectionListView').show();
+            $('#reflectionGridView').hide();
+        } else {
+            $('#reflectionListView').hide();
+            $('#reflectionGridView').show();
+        }
+    });
+
+    // Evidence link click handler
+    $(document).on('click', '.evidence-link', function() {
+        const evidenceId = $(this).data('evidence-id');
+        if (evidenceId) {
+            // Replace this with your actual evidence viewing URL
+            const evidenceUrl = `${evidenceId}/`;
+            window.open(evidenceUrl, '_blank');
+        }
+    });
+
+    // Delete reflection functionality
+    $(document).on('click', '.delete-reflection', function() {
+        const reflectionId = $(this).data('reflection-id');
+        const reflectionTitle = $(this).data('reflection-title');
+        
+        if (confirm(`Are you sure you want to delete the reflection "${reflectionTitle}"? This action cannot be undone.`)) {
+            // Send AJAX request to delete reflection
+            $.ajax({
+                url: `/trainee/portfolio/reflections/delete/${reflectionId}/`,
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Remove the reflection from DOM
+                        $(`.delete-reflection[data-reflection-id="${reflectionId}"]`).closest('.reflection-item').remove();
+                        
+                        // Show success message
+                        showMessage('Reflection deleted successfully!', 'success');
+                        
+                        // Update reflection count
+                        updateReflectionCount();
+                    } else {
+                        showMessage('Error deleting reflection: ' + response.error, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showMessage('Error deleting reflection. Please try again.', 'error');
+                }
+            });
+        }
+    });
+
+    // Helper function to show messages
+    function showMessage(message, type) {
+        // You can implement a toast notification or use existing alert system
+        alert(`${type.toUpperCase()}: ${message}`);
+    }
+
+    // Helper function to update reflection count
+    function updateReflectionCount() {
+        const count = $('.reflection-item:visible').length;
+        // Update your reflection count display if needed
+        console.log(`Visible reflections: ${count}`);
+    }
+
+    // Helper function to update reflection separators
+    function updateReflectionSeparators() {
+        // Implement if needed for better visual separation
+    }
+
+    // Form validation (existing)
+    $('#reflectionForm').on('submit', function() {
+        let isValid = true;
+        $('.form-control').removeClass('is-invalid');
+        $('#reflection_title, #reflection_content').each(function() {
+            if (!$(this).val().trim()) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            }
+        });
+        if (!isValid) {
+            alert('Please fill in all required fields.');
+            return false;
+        }
+        return true;
+    });
+
+    // Auto-save draft functionality (existing)
+    let draftTimer;
+    let draftKey = 'reflection_draft';
+    function saveDraft() {
+        const draftData = {
+            title: $('#reflection_title').val(),
+            content: $('#reflection_content').val(),
+            unit_name: $('#unit_name').val(),
+            unit_code: $('#unit_code').val(),
+            term: $('#term_select').val(),
+            assessment_type: $('#assessment_type').val(),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
+    }
+    $('#reflectionForm input, #reflectionForm textarea, #reflectionForm select').on('input change', function() {
+        clearTimeout(draftTimer);
+        draftTimer = setTimeout(saveDraft, 5000);
+    });
+    const savedDraft = localStorage.getItem(draftKey);
+    if (savedDraft) {
+        const draft = JSON.parse(savedDraft);
+        $('#reflection_title').val(draft.title || '');
+        $('#reflection_content').val(draft.content || '');
+        $('#unit_name').val(draft.unit_name || '');
+        $('#unit_code').val(draft.unit_code || '');
+        $('#term_select').val(draft.term || '');
+        $('#assessment_type').val(draft.assessment_type || '');
+    }
+    $('#reflectionForm').on('submit', function() {
+        localStorage.removeItem(draftKey);
+    });
+});
+</script>
+{% endblock %}

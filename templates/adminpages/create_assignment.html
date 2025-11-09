@@ -1,0 +1,137 @@
+{% extends 'clientside/base.html' %}
+{% load static %}
+
+{% block title %}Create Assignment - TeCADE{% endblock %}
+
+{% block extra_styles %}
+<!-- Google Web Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+<!-- Icon Font Stylesheet -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Libraries Stylesheet -->
+<link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+<link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
+
+<!-- Customized Bootstrap Stylesheet -->
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+<!-- Template Stylesheet -->
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5 bg-primary" style="margin-bottom: 50px;">
+    <div class="row py-5">
+        <div class="col-12 pt-lg-5 mt-lg-5 text-center">
+            <h1 class="display-4 text-white">Create Assignment</h1>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="max-width: 900px; margin: auto; background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; color: navy; margin-bottom: 30px;">Assignment Details</h2>
+    <hr style="border: 1px solid peru; margin-bottom: 30px;">
+
+    <form method="POST" enctype="multipart/form-data" style="background-color: #f8f9fa; padding: 25px; border-radius: 10px;">
+        {% csrf_token %}
+        
+        <!-- Assignment Title -->
+        <div class="form-group">
+            <label for="title">Assignment Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Enter Assignment Title" required>
+        </div>
+
+        <!-- Select Course -->
+        <div class="form-group">
+            <label for="course">Select Course</label>
+            <select class="form-control" id="course" name="course" required>
+                <option value="">-- Select Course --</option>
+                {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Instructor Name -->
+        <div class="form-group">
+            <label for="instructor_name">Instructor Name</label>
+            <input type="text" class="form-control" id="instructor_name" name="instructor_name" placeholder="Enter Instructor Name" required>
+        </div>
+
+        <!-- Instructor Email -->
+        <div class="form-group">
+            <label for="instructor_email">Instructor Email</label>
+            <input type="email" class="form-control" id="instructor_email" name="instructor_email" placeholder="Enter Instructor Email" required>
+        </div>
+
+        <!-- Due Date -->
+        <div class="form-group">
+            <label for="due_date">Due Date</label>
+            <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+        </div>
+
+        <!-- Maximum Points -->
+        <div class="form-group">
+            <label for="max_points">Maximum Points</label>
+            <input type="number" class="form-control" id="max_points" name="max_points" placeholder="Enter Maximum Points" required>
+        </div>
+
+        <!-- Assignment Description -->
+        <div class="form-group">
+            <label for="description">Assignment Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter Assignment Description" required></textarea>
+        </div>
+
+        <!-- Instructions -->
+        <div class="form-group">
+            <label for="instructions">Instructions</label>
+            <textarea class="form-control" id="instructions" name="instructions" rows="3" placeholder="Enter Assignment Instructions"></textarea>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="form-group">
+            <label for="learning_objectives">Learning Objectives</label>
+            <textarea class="form-control" id="learning_objectives" name="learning_objectives" rows="3" placeholder="Enter Learning Objectives"></textarea>
+        </div>
+
+        <!-- Rubric -->
+        <div class="form-group">
+            <label for="rubric">Rubric</label>
+            <textarea class="form-control" id="rubric" name="rubric" rows="3" placeholder="Enter Assignment Rubric"></textarea>
+        </div>
+
+        <!-- Attachment -->
+        <div class="form-group">
+            <label for="attachment">Attachment (Optional)</label>
+            <input type="file" class="form-control-file" id="attachment" name="attachment">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+            Create Assignment
+        </button>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'lib/wow/wow.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Template Javascript -->
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}

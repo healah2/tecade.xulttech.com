@@ -1,0 +1,93 @@
+{% extends 'clientside/base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<!-- Google Web Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+<!-- Icon Font Stylesheet -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Libraries Stylesheet -->
+<link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+<link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
+
+<!-- Customized Bootstrap Stylesheet -->
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+<!-- Template Stylesheet -->
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+
+<!-- templates/notice_detail.html -->
+<div class="container py-5">
+  <div class="row">
+    <!-- Main Notice Content -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm mb-4">
+        {% if notice.memo_image %}
+          <img src="{{ notice.memo_image.url }}" class="card-img-top" alt="{{ notice.title }}">
+        {% else %}
+          <div class="card-img-top no-image-bg" style="height: 400px; background: linear-gradient(135deg, #87CEEB, #1E90FF);"></div>
+        {% endif %}
+        <div class="card-body">
+          <h1 class="card-title">{{ notice.title }}</h1>
+          <div class="d-flex align-items-center mb-3 text-muted">
+            <i class="fa fa-calendar me-2"></i>
+            <span class="me-3">{{ notice.created_at|date:"M d, Y" }}</span>
+            <i class="fa fa-clock me-2"></i>
+            <span>{{ notice.created_at|time:"H:i" }}</span>
+          </div>
+          <div class="card-text">
+            {{ notice.description|linebreaks }}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Other Notices Sidebar -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Recent Notices</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for other in other_notices %}
+          <a href="{% url 'trainee:notice_detail' other.pk %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">{{ other.title }}</h6>
+              <small>{{ other.created_at|timesince }} ago</small>
+            </div>
+            <p class="mb-1 text-muted">{{ other.description|truncatewords:10 }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'lib/wow/wow.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Template Javascript -->
+<script src="{% static 'js/main.js' %}"></script>
+
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends 'trainer/trainer_base.html' %}
+{% load static %}
+{% block title %}Tecade | Trainer Dashboard{% endblock %}
+
+{% block extra_styles %}
+<!-- Bootstrap 3.3.5 -->
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Ionicons -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+{% endblock %}
+
+{% block content %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1 style="display: inline-block;">
+            Learning Plan
+            <small>{{ course }} - {{ level }}</small>
+        </h1>
+        <div class="no-print" style="float: right; margin-top: 5px;">
+            <button onclick="window.print()" class="btn btn-default">
+                <i class="fa fa-print"></i> Print
+            </button>
+        </div>
+    </section>
+
+
+    <section class="content">
+        <!-- Votehead -->
+        <div class="box box-primary">
+            <!-- Votehead -->
+            <div style="text-align: center; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="margin: 0; font-weight: bold;">TECADE INSTITUTIONAL MANAGEMENT SYSTEM</h2>
+                <p style="margin: 2px 0;">
+                    P.O Box 1316-50100, Kakamega, E-mail: <a href="mailto:info@tecade.ac.ke">info@tecade.ac.ke</a>,
+                    Mobile Phone: 0739922223
+                </p>
+                <p style="margin: 2px 0;">
+                    Website: <a href="http://www.tecade.ac.ke" target="_blank">www.tecade.ac.ke</a>
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- Metadata -->
+        <div class="box box-primary">
+            <div class="box-body">
+                <table class="table table-bordered" style="width:100%; border-collapse: collapse;">
+                    <tbody>
+                        <tr>
+                            <th style="width: 25%;">Unit of Competence</th>
+                            <td colspan="3">{{ unit_competence }}</td>
+                        </tr>
+                        <tr>
+                            <th>Unit Code</th>
+                            <td>{{ unit_code }}</td>
+                            <th>Name of Trainer</th>
+                            <td>{{ trainer_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Course</th>
+                            <td>{{ course }}</td>
+                            <th>Institution</th>
+                            <td>{{ institution }}</td>
+                        </tr>
+                        <tr>
+                            <th>Level</th>
+                            <td>{{ level }}</td>
+                            <th>Term</th>
+                            <td>{{ term }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date of Preparation</th>
+                            <td>{{ date_preparation }}</td>
+                            <th>Date of Revision</th>
+                            <td>{{ date_revision }}</td>
+                        </tr>
+                        <tr>
+                            <th>Number of Trainees</th>
+                            <td>{{ trainees }}</td>
+                            <th>Class</th>
+                            <td>{{ class_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Time (hrs)</th>
+                            <td colspan="3">{{ total_time }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- Sessions Grouped by Learning Outcome -->
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Learning Plan</h3>
+            </div>
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Week</th>
+                            <th>Session No.</th>
+                            <th>Session Title</th>
+                            <th>Learning Expectations</th>
+                            <th>Trainer Activities</th>
+                            <th>Trainee Activities</th>
+                            <th>Resources & Refs</th>
+                            <th>Learning Checks/Assessments</th>
+                            <th>Reflections & Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                        {% if session.special %}
+                        <!-- Special Heading Row -->
+                        <tr class="bg-info">
+                            <td colspan="9" style="text-align:center; font-weight:bold;">
+                                {{ session.title }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        {% ifchanged session.learning_outcome %}
+                        <!-- Learning Outcome Header Row -->
+                        <tr class="bg-success">
+                            <td colspan="9" style="font-weight:bold; text-align:center;">
+                                Learning Outcome {{ session.outcome_no }}: {{ session.learning_outcome }}
+                            </td>
+                        </tr>
+                        {% endifchanged %}
+
+                        <!-- Normal session row -->
+                        <tr>
+                            <td>{{ session.week }}</td>
+                            <td>{{ session.session_no }}</td>
+                            <td>{{ session.title }}</td>
+                            <td>
+                                <ul style="padding-left: 15px; margin:0;">
+                                    {% for exp in session.expectations %}
+                                    <li>{{ exp }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <ul style="padding-left: 15px; margin:0;">
+                                    {% for item in session.trainer_activities %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <ul style="padding-left: 15px; margin:0;">
+                                    {% for item in session.trainee_activities %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <ul style="padding-left: 15px; margin:0;">
+                                    {% for item in session.resources %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <ul style="padding-left: 15px; margin:0;">
+                                    {% for item in session.assessments %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td></td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+
+        <!-- Print Button -->
+
+    </section>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+
+<!-- jQuery 2.1.4 -->
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<!-- Bootstrap 3.3.5 -->
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<!-- FastClick -->
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,556 @@
+{% extends 'trainee/trainee_main.html' %}
+{% load static %}
+
+{% block title %}TeCADE - Digital Library{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-bs3.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.13.0/dist/index.css" />
+<style>
+    /* Chatbot specific styles */
+  .chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .chatbot-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #3c8dbc;
+    color: white;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  
+  .chat-modal {
+    display: none;
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 400px;
+    height: 550px;
+    border-radius: 12px;
+    border-bottom-right-radius: 2px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    background: white;
+    z-index: 1000;
+    flex-direction: column;
+  }
+  
+  .chat-modal.expanded {
+    width: 80%;
+    height: 80%;
+    bottom: 5%;
+    right: 5%;
+  }
+  
+  .chat-header {
+    background-color: #3c8dbc;
+    color: white;
+    padding: 10px 15px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .chat-footer {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+  }
+  
+  .message {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 18px;
+    margin-bottom: 5px;
+    position: relative;
+  }
+  
+  .user-message {
+    border-bottom-right-radius: 1px;
+    background-color: #daf8cb;
+    align-self: flex-end;
+  }
+  
+  .bot-message {
+    border-bottom-left-radius: 1px;
+    background-color: #f1f0f0;
+    align-self: flex-start;
+  }
+  
+  .message-time {
+    font-size: 0.7em;
+    color: #999;
+    margin-top: 5px;
+    text-align: right;
+  }
+  
+  .emoji-btn, .expand-btn, .image-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  .emoji-picker {
+    position: absolute;
+    bottom: 50px;
+    right: 10px;
+    z-index: 1001;
+    display: none;
+  }
+  
+  .image-preview {
+    max-width: 100%;
+    max-height: 100px;
+    margin-top: 10px;
+    display: none;
+  }
+</style>
+
+{% endblock %}
+
+{{ block.super }}
+<style>
+    .library_container {
+    max-width: 1200px; margin: 20px auto; padding: 20px; background:#fff;
+    border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  }
+
+    .btn-read {
+    background-color: #5cbeff;
+    color: white;
+    padding: 6px 12px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.btn-read:hover {
+    background-color: #0a9cf0;
+}
+</style>
+
+
+{% block page_title %}Library{% endblock %}
+{% block page_subtitle %}
+  {% if timetables %}{{ timetables.course.name }} ({{ timetables.level }}){% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'trainee:trainee_dashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+  <li class="active">Library</li>
+{% endblock %}
+
+
+{% block main_content %}
+<div class="library_container">
+    <!-- Page header -->
+    <section class="content-header" style="background-color: #daf8cb;">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h3>TeCADE Digital Library</h3>
+                    <p class="text-muted">Search, Borrow, Ask Our Bot below amd Explore Resources</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- Search & Filter Panel -->
+        <div class="card card-outline card-success">
+            <div class="card-header card-outline card-success">
+                <h4 class="card-title">Search & Filter</h4>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="row">
+                        <div class="col-md-3" style="padding-bottom: 5px;">
+                            <input type="text" name="q" class="form-control" placeholder="Search books">
+                        </div>
+                        <div class="col-md-3" style="padding-bottom: 10px;">
+                            <select name="department" class="form-control">
+                                <option value="">-- Department --</option>
+                                <option value="ICT">ICT</option>
+                                <option value="Business">Business</option>
+                                <option value="Engineering">Engineering</option>
+                            </select>
+                        </div>
+                        <!-- <div class="col-md-2">
+                            <input type="number" name="year" class="form-control" placeholder="Year">
+                        </div> -->
+                        <div class="col-md-1" style="padding-bottom: 15px;">
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+<!-- Books Listing -->
+<div class="row">
+    {% if books %}
+        {% for book in books %}
+        <div class="col-md-3"style="padding-bottom: 16px;">
+            <div class="card card-outline card-primary h-100">
+                <div class="card-body text-center">
+                    <img src="{{ book.cover }}" class="img-fluid mb-2" alt="Book Cover" 
+                         style="height:180px; object-fit:cover;">
+                    <h6 class="mt-2">{{ book.title|truncatechars:50 }}</h6>
+                    <p class="text-muted">{{ book.author }}</p>
+                     {% if book.preview_link %}
+                    <a href="{{ book.preview_link }}" target="_blank" class="btn-read">Read Preview</a>
+                     {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'trainee:love_book' book.google_id %}" 
+                       class="btn btn-sm btn-primary">
+                        <i class="fa fa-thumb-up"></i> Like
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        {% if search_query %}
+            <div class="col-12" style="padding-bottom: 8px;">
+                <div class="alert alert-info text-center">
+                    No books found.
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12" style="padding-bottom: 8px;">
+                <div class="alert alert-info text-center">
+                    Search for a book to get started.
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+        <!-- My Borrowed Books -->
+        <div class="card card-outline card-warning mt-4">
+            <div class="card-header">
+                <h3 class="card-title">My Borrowed Books</h3>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for borrowed in borrowed_books %}
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                {% if borrowed.is_overdue %}
+                                    <span class="badge badge-danger">Overdue</span>
+                                {% else %}
+                                    <span class="badge badge-success">On Time</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">You have not borrowed any books.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<!-- Chatbot Button and Modal -->
+<div class="chatbot-container">
+  <button class="chatbot-btn" id="chatbotToggle">
+    <i class="fa fa-comments"></i>
+  </button>
+  
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-header">
+      <span>Study Assistant</span>
+      <div>
+        <button class="expand-btn" id="expandChat">
+          <i class="fa fa-expand"></i>
+        </button>
+        <button class="close-btn" id="closeChat">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="chat-body" id="chatBody">
+      <div class="message bot-message">
+        <p>Hello{{ trainee.first_name }}!, I'm here to help you in your Studies research. How can I assist you today?</p>
+        <div class="message-time" id="initial-time"></div>
+      </div>
+    </div>
+    
+    <div class="chat-footer">
+      <button class="emoji-btn" id="emojiBtn">
+        <i class="fa fa-smile-o"></i>
+      </button>
+      <button class="image-btn" id="imageBtn">
+        <i class="fa fa-image"></i>
+        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+      </button>
+      <input type="text" id="messageInput" placeholder="Type your message..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px;">
+      <button id="sendMessage" style="background: none; border: none; margin-left: 5px;">
+        <i class="fa fa-paper-plane"></i>
+      </button>
+    </div>
+    
+    <emoji-picker class="emoji-picker" id="emojiPicker"></emoji-picker>
+    <img id="imagePreview" class="image-preview">
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.13.0/dist/index.js" type="module"></script>
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<script src="{% static 'plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+<script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js' %}"></script>
+<script src="{% static 'plugins/chartjs/Chart.min.js' %}"></script>
+<script src="{% static 'dist/js/pages/dashboard2.js' %}"></script>
+<script src="{% static 'dist/js/demo.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Elements
+  const chatbotToggle = document.getElementById('chatbotToggle');
+  const chatModal = document.getElementById('chatModal');
+  const closeChat = document.getElementById('closeChat');
+  const expandChat = document.getElementById('expandChat');
+  const chatBody = document.getElementById('chatBody');
+  const messageInput = document.getElementById('messageInput');
+  const sendMessageBtn = document.getElementById('sendMessage');
+  const emojiBtn = document.getElementById('emojiBtn');
+  const emojiPicker = document.getElementById('emojiPicker');
+  const imageBtn = document.getElementById('imageBtn');
+  const imageUpload = document.getElementById('imageUpload');
+  const imagePreview = document.getElementById('imagePreview');
+  const initialTime = document.getElementById('initial-time');
+  
+  // Set initial time
+  initialTime.textContent = new Date().toLocaleTimeString();
+  
+  // Load previous conversation from sessionStorage
+  loadConversation();
+  
+  // Toggle chat modal
+  chatbotToggle.addEventListener('click', () => {
+    chatModal.style.display = chatModal.style.display === 'flex' ? 'none' : 'flex';
+  });
+  
+  // Close chat
+  closeChat.addEventListener('click', () => {
+    chatModal.style.display = 'none';
+  });
+  
+  // Expand chat
+  expandChat.addEventListener('click', () => {
+    chatModal.classList.toggle('expanded');
+  });
+  
+  // Toggle emoji picker
+  emojiBtn.addEventListener('click', () => {
+    emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+  });
+  
+  // Insert emoji when selected
+  emojiPicker.addEventListener('emoji-click', event => {
+    messageInput.value += event.detail.unicode;
+    emojiPicker.style.display = 'none';
+  });
+  
+  // Handle image upload
+  imageBtn.addEventListener('click', () => {
+    imageUpload.click();
+  });
+  
+  imageUpload.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // Send message
+  sendMessageBtn.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+  
+  function sendMessage() {
+    const message = messageInput.value.trim();
+    const imageData = imagePreview.style.display === 'block' ? imagePreview.src : null;
+    
+    if (message || imageData) {
+      // Add user message to chat
+      addMessage(message, imageData, 'user');
+      
+      // Clear input and hide image preview
+      messageInput.value = '';
+      imagePreview.style.display = 'none';
+      imageUpload.value = '';
+      
+      // Call Googel
+      tecadeBot(message, imageData);
+      
+      // Save conversation to sessionStorage
+      saveConversation();
+    }
+  }
+  
+  function addMessage(text, imageData = null, sender = 'user') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    if (text) {
+      const textPara = document.createElement('p');
+      textPara.textContent = text;
+      messageDiv.appendChild(textPara);
+    }
+    
+    if (imageData) {
+      const img = document.createElement('img');
+      img.src = imageData;
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '150px';
+      img.style.marginTop = '10px';
+      messageDiv.appendChild(img);
+    }
+    
+    const timeSpan = document.createElement('div');
+    timeSpan.className = 'message-time';
+    timeSpan.textContent = new Date().toLocaleTimeString();
+    messageDiv.appendChild(timeSpan);
+    
+    chatBody.appendChild(messageDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+  
+function tecadeBot (message, imageData = null) {
+  // Prepare the data
+  const requestData = {
+    message: message,
+    image: imageData ? imageData.replace(/^data:image\/(png|jpg|jpeg);base64,/, "") : null
+  };
+  
+  // Call your Django view
+  fetch('/trainee/tecade_bot/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify(requestData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.response) {
+      addMessage(data.response, null, 'bot');
+    } else if (data.error) {
+      addMessage("Aah so Baad, {{ trainee.first_name }}!, I'm havig trouble connecting to the servers right now. Please try again leter..", null, 'bot');
+    }
+    saveConversation();
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    addMessage("Sorry, I encountered an error. Please try again", null, 'bot');
+    saveConversation();
+  });
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+  
+  function saveConversation() {
+    const conversation = chatBody.innerHTML;
+    sessionStorage.setItem('chatConversation', conversation);
+  }
+  
+  function loadConversation() {
+    const savedConversation = sessionStorage.getItem('chatConversation');
+    if (savedConversation) {
+      chatBody.innerHTML = savedConversation;
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+  }
+});
+</script>
+{% endblock %}

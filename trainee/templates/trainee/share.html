@@ -1,0 +1,139 @@
+{% extends 'trainee/portfolio.html' %}
+{% load static %}
+
+{% block title %}TeCADE - Share Portfolio{% endblock %}
+
+{% block portfolio_content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Share Your Portfolio</h3>
+            </div>
+            <div class="box-body">
+                {% if share_link %}
+                <div class="alert alert-success">
+                    <h4><i class="fa fa-check-circle"></i> Portfolio Shared</h4>
+                    <p>Your portfolio is now accessible via the link below:</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Share Link:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareLink" value="{{ share_link }}" readonly>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" onclick="copyShareLink()">
+                                <i class="fa fa-copy"></i> Copy
+                            </button>
+                        </span>
+                    </div>
+                    <p class="help-block">Anyone with this link can view your portfolio</p>
+                </div>
+
+                {% if current_share.expires_at %}
+                <div class="alert alert-info">
+                    <i class="fa fa-clock-o"></i>
+                    This link expires on: {{ current_share.expires_at|date:"F j, Y, g:i a" }}
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="deactivate">
+                    <button type="submit" class="btn btn-warning btn-block">
+                        <i class="fa fa-times"></i> Deactivate Share Link
+                    </button>
+                </form>
+
+                {% else %}
+                <div class="alert alert-info">
+                    <h4><i class="fa fa-share-alt"></i> Share Your Work</h4>
+                    <p>Generate a shareable link to showcase your portfolio with others.</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create">
+                    
+                    <div class="form-group">
+                        <label for="expires">Link Expires After:</label>
+                        <select class="form-control" name="expires" id="expires">
+                            <option value="1">1 day</option>
+                            <option value="7">7 days</option>
+                            <option value="30" selected>30 days</option>
+                            <option value="90">90 days</option>
+                            <option value="0">Never expire</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa fa-share"></i> Generate Share Link
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Sharing Information</h3>
+            </div>
+            <div class="box-body">
+                <div class="alert alert-warning">
+                    <h4><i class="fa fa-info-circle"></i> What's Shared?</h4>
+                    <ul class="list-unstyled">
+                        <li>✓ Evidence items</li>
+                        <li>✓ Competency progress</li>
+                        <li>✓ Reflections</li>
+                        <li>✓ Assessment feedback</li>
+                        <li>✗ Personal contact information</li>
+                        <li>✗ Login credentials</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyShareLink() {
+    const copyText = document.getElementById("shareLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    
+    // Show feedback
+    const button = event.target;
+    const originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fa fa-check"></i> Copied!';
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        button.innerHTML = originalHtml;
+        button.classList.remove('btn-success');
+    }, 2000);
+}
+</script>
+
+<style>
+.help-block {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.alert ul {
+    margin-bottom: 0;
+}
+
+.alert li {
+    padding: 2px 0;
+}
+
+.input-group-btn .btn {
+    border-left: 0;
+}
+</style>
+{% endblock %}
