@@ -790,38 +790,52 @@ class PortfolioShare(models.Model):
 # <<Dp_Academics >>
 
 class TrainerData(models.Model):
-    GENDER_CHOICES = [
-        ('Male', 'Male'),
-        ('Female', 'Female'),
-        ('Other', 'Other'),
-    ]
-
     # Personal Information
-    first_name = models.CharField(max_length=50)
-    middle_name = models.CharField(max_length=50, blank=True)
-    last_name = models.CharField(max_length=50)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
+    passport_image = models.ImageField(upload_to='trainer_passports/', null=True, blank=True)
+    first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, blank=True, null=True)
+    last_name = models.CharField(max_length=100)
+    gender = models.CharField(max_length=20)
+    dob = models.DateField(null=True, blank=True)
+
+    employer = models.CharField(max_length=50, null=True, blank=True)  # PSC / Board
+    staff_number = models.CharField(max_length=100, null=True, blank=True)
+    id_number = models.CharField(max_length=50, null=True, blank=True)
     phone = models.CharField(max_length=20)
-    email = models.EmailField(unique=True)
-    passport_image = models.ImageField(upload_to='trainer_passports/', blank=True, null=True)
 
-    # Department / Courses
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    courses = models.ManyToManyField(Course, related_name='trainers')
+    first_appointment = models.DateField(null=True, blank=True)
+    current_appointment = models.DateField(null=True, blank=True)
 
-    # Qualifications
-    highest_education = models.CharField(max_length=100, blank=True)
-    certificates = models.CharField(max_length=255, blank=True)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True)
 
-    # Residential
-    county = models.CharField(max_length=50, blank=True)
-    sub_county = models.CharField(max_length=50, blank=True)
-    town = models.CharField(max_length=50, blank=True)
+    current_jg = models.CharField(max_length=50, blank=True, null=True)  # Optional
+    courses = models.CharField(max_length=500, blank=True, null=True)  # Store comma-separated IDs
+    special_responsibilities = models.CharField(max_length=200, blank=True, null=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    # Next of Kin
+    kin_name = models.CharField(max_length=200, null=True, blank=True)
+    kin_phone = models.CharField(max_length=20, null=True, blank=True)
+    kin_address = models.CharField(max_length=200, blank=True, null=True)
+    kin_email = models.EmailField(blank=True, null=True)
+
+    # Academic Documents
+    tertiary_certificate = models.FileField(upload_to='trainer_docs/', null=True, blank=True)
+    o_level_certificate = models.FileField(upload_to='trainer_docs/', null=True, blank=True)
+    secondary_certificate = models.FileField(upload_to='trainer_docs/', null=True, blank=True)
+
+    date_registered = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+
+class TrainerOtherDocument(models.Model):
+    trainer = models.ForeignKey(TrainerData, on_delete=models.CASCADE, related_name="other_docs")
+    document = models.FileField(upload_to="trainer_others/")
+
+    def __str__(self):
+        return f"Other Document for {self.trainer.first_name} {self.trainer.last_name}"
+
 
 
 

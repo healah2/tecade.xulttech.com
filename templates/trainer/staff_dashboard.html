@@ -1,6 +1,6 @@
 {% extends 'trainer/trainer_base.html' %}
 {% load static %}
-{% block title %}Tecade | Session Registration{% endblock %}
+{% block title %}Tecade | Trainer Dashboard{% endblock %}
 
 
 {% block extra_styles %}
@@ -36,13 +36,9 @@
   <!-- Content Header (Page header) -->
   <section class="content-header">
     <h1>
-      Dashboard
-      <small>Version 2.0</small>
+      Trainer Dashboard
     </h1>
-    <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-      <li class="active">Dashboard</li>
-    </ol>
+
   </section>
 
   <!-- Main content -->
@@ -112,7 +108,7 @@
       <div class="col-md-12">
         <div class="box">
           <div class="box-header with-border">
-            <h3 class="box-title">Monthly Recap Report</h3>
+            <h3 class="box-title">Lesson Attendance Per Unit</h3>
 
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -136,7 +132,7 @@
             <div class="row">
               <div class="col-md-8">
                 <p class="text-center">
-                  <strong>Sales: 1 Jan, 2014 - 30 Jul, 2014</strong>
+                  <strong>Weekly Attendance Stats</strong>
                 </p>
 
                 <div class="chart">
@@ -148,12 +144,12 @@
               <!-- /.col -->
               <div class="col-md-4">
                 <p class="text-center">
-                  <strong>Goal Completion</strong>
+                  <strong>Syllabus coverage</strong>
                 </p>
 
                 <div class="progress-group">
-                  <span class="progress-text">Add Products to Cart</span>
-                  <span class="progress-number"><b>160</b>/200</span>
+                  <span class="progress-text">Perform Web Design (L6/24J)</span>
+                  <span class="progress-number"><b>150</b>/200 Hrs</span>
 
                   <div class="progress sm">
                     <div class="progress-bar progress-bar-aqua" style="width: 80%"></div>
@@ -161,8 +157,8 @@
                 </div>
                 <!-- /.progress-group -->
                 <div class="progress-group">
-                  <span class="progress-text">Complete Purchase</span>
-                  <span class="progress-number"><b>310</b>/400</span>
+                  <span class="progress-text">Develop Mobile Application (L5/24S)</span>
+                  <span class="progress-number"><b>170</b>/200 Hrs</span>
 
                   <div class="progress sm">
                     <div class="progress-bar progress-bar-red" style="width: 80%"></div>
@@ -170,8 +166,8 @@
                 </div>
                 <!-- /.progress-group -->
                 <div class="progress-group">
-                  <span class="progress-text">Visit Premium Page</span>
-                  <span class="progress-number"><b>480</b>/800</span>
+                  <span class="progress-text">Install Computer Software (L6/24s)</span>
+                  <span class="progress-number"><b>180</b>/200 Hrs</span>
 
                   <div class="progress sm">
                     <div class="progress-bar progress-bar-green" style="width: 80%"></div>
@@ -179,8 +175,8 @@
                 </div>
                 <!-- /.progress-group -->
                 <div class="progress-group">
-                  <span class="progress-text">Send Inquiries</span>
-                  <span class="progress-number"><b>250</b>/500</span>
+                  <span class="progress-text">Perform Computer Programming (L6/24S)</span>
+                  <span class="progress-number"><b>150</b>/200 Hrs</span>
 
                   <div class="progress sm">
                     <div class="progress-bar progress-bar-yellow" style="width: 80%"></div>
@@ -248,7 +244,8 @@
         <!-- MAP & BOX PANE -->
         <div class="box box-success">
           <div class="box-header with-border">
-            <h3 class="box-title">Visitors Report</h3>
+            <h3 class="box-title"> Academic Report </h3>
+            <!-- bar chart with per unit Formative assessment and Practical assessment-->
 
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -301,6 +298,7 @@
             <div class="box box-warning direct-chat direct-chat-warning">
               <div class="box-header with-border">
                 <h3 class="box-title">Direct Chat</h3>
+                <!-- Chat between trainer and department members -->
 
                 <div class="box-tools pull-right">
                   <span data-toggle="tooltip" title="3 New Messages" class="badge bg-yellow">3</span>
@@ -503,7 +501,7 @@
             <!-- USERS LIST -->
             <div class="box box-danger">
               <div class="box-header with-border">
-                <h3 class="box-title">Latest Members</h3>
+                <h3 class="box-title">Department Members</h3>
 
                 <div class="box-tools pull-right">
                   <span class="label label-danger">8 New Members</span>
@@ -740,7 +738,7 @@
 
         <div class="box box-default">
           <div class="box-header with-border">
-            <h3 class="box-title">Browser Usage</h3>
+            <h3 class="box-title">Lesson Allocation Per Unit</h3>
 
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>

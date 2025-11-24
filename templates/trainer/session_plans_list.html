@@ -1,0 +1,82 @@
+{% extends 'trainer/trainer_base.html' %}
+{% load static %}
+{% block title %}Tecade | Session Plans{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datatables/dataTables.bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>Session Plans</h1>
+    </section>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Saved Session Plans</h3>
+            </div>
+
+            <div class="box-body">
+                <table id="sessionPlansTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Unit of Competence</th>
+                            <th>Session Title</th>
+                            <th>Duration (min)</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for plan in plans %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ plan.unit.unit_competence }}</td>
+                            <td>{{ plan.session_title }}</td>
+                            <td>{{ plan.duration }}</td>
+                            <td>{{ plan.date }}</td>
+                            <td>
+                                <a href="{% url 'view_session_plan' plan.id %}" class="btn btn-primary btn-sm">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No session plans available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables/dataTables.bootstrap.min.js' %}"></script>
+
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+
+<script>
+    $(function () {
+        $('#sessionPlansTable').DataTable();
+    });
+</script>
+{% endblock %}

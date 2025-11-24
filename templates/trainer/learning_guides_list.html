@@ -1,6 +1,6 @@
 {% extends 'trainer/trainer_base.html' %}
 {% load static %}
-{% block title %}Tecade | All Payments {% endblock %}
+{% block title %}Tecade | Learning Guides {% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
@@ -42,20 +42,20 @@
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th>Class</th>
                             <th>Course</th>
                             <th>Level</th>
-                            <th>Session Period</th>
-                            <th>Uploaded At</th>
+                            <th>Unit of Competence</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for guide in guides %}
                         <tr>
-                            <td>{{ guide.course_name }}</td>
+                            <td>{{ guide.class_name}}</td>
+                            <td>{{ guide.course }}</td>
                             <td>{{ guide.level }}</td>
-                            <td>{{ guide.start_date }} → {{ guide.end_date }}</td>
-                            <td>{{ guide.uploaded_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ guide.unit_competence}}</td>
                             <td>
                                 <a href="{% url 'view_learning_guide' guide.pk %}" class="btn btn-primary btn-sm">
                                     View

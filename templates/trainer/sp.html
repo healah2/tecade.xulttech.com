@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Seven-Row Session Plan Template - Styled</title>
+    <style>
+        /* 1. Reset margin and padding for the body, ensuring full-page coverage */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Inter', Arial, sans-serif;
+            box-sizing: border-box;
+            background-color: #f0f0f0;
+            /* Light background for the page */
+        }
+
+        /* 2. Style the main outer table (page-filling) */
+        .main-table {
+            width: 90%;
+            height: 90vh;
+            /* 90% of viewport height */
+            margin: 5vh auto;
+            /* Centers the table and adds margin around it */
+            border-collapse: collapse;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            /* Subtle 3D effect */
+            border-radius: 8px;
+            /* Rounded corners for the entire table */
+            overflow: hidden;
+            /* Ensures shadow/border corners look right */
+        }
+
+        /* 3. Style the main outer cells */
+        .main-table th,
+        .main-table td {
+            padding: 30px;
+            /* Large inner padding */
+            border: 1px solid #ddd;
+            /* Lighter border for outer cells */
+            text-align: left;
+            font-size: 20px;
+            vertical-align: top;
+            /* Align content to the top of the cell */
+            background-color: white;
+            /* White background for clean look */
+            line-height: 1.5;
+        }
+
+        /* Style the header for distinction */
+        .main-table th {
+            background-color: #4a5568;
+            /* Darker header */
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            height: 8%;
+            /* Fixed height for header */
+            border-bottom: 3px solid #333;
+        }
+
+        /* 4. Nested Table Styling (for Row 5 - COMPACT) */
+        .nested-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 1px solid #bbb;
+            /* Define the outer border of the nested table */
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /* Compact cell styling for nested table */
+        .nested-table th,
+        .nested-table td {
+            /* Override the large padding and font from the main table */
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            /* Lighter inner borders */
+            background-color: #fff;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        /* Compact header styling for nested table */
+        .nested-table th {
+            background-color: #e2e8f0;
+            /* Light blue/gray header for contrast */
+            color: #2d3748;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Styling for the filler lines/blanks */
+        .blank-line {
+            border-bottom: 2px solid #333;
+            display: inline-block;
+            width: 50%;
+            margin-left: 10px;
+        }
+
+        /* Styling for bold titles in the outer cells */
+        .section-title {
+            font-weight: bold;
+            color: #2c5282;
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th>Session Plan </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ROW 1: Session Plan Info -->
+            <tr>
+                <td>
+
+                    Session Plan Title: <span class="blank-line" style="width: 30%;"></span> Duration:__ min
+                    &nbsp;&nbsp;&nbsp;
+                    Date: <span class="blank-line" style="width: 15%;"></span>
+                    &nbsp;&nbsp;&nbsp;
+                    Presenter name: <span class="blank-line" style="width: 20%;"></span>
+                </td>
+            </tr>
+
+            <!-- ROW 2: Bridge-in -->
+            <tr>
+                <td>
+
+                    Bridge-in: <span class="blank-line" style="width: 10%;"></span> minutes
+                    <br><br>
+                    <em style="color: #555;">/*Use any one of Active learning strategies here*/</em>
+                </td>
+            </tr>
+
+            <!-- ROW 3: Learning Outcome -->
+            <tr>
+                <td>
+                    <span class="section-title">Learning Expectation</span>
+
+                    By the end of the session, the trainee will:
+
+                    <span class="blank-line" style="width: 100%;"></span>
+
+                </td>
+            </tr>
+
+            <!-- ROW 4: Pre-assessment -->
+            <tr>
+                <td>
+
+                    Pre-assessment (<span class="blank-line" style="width: 10%;"></span> minutes)
+                </td>
+            </tr>
+
+            <!-- ROW 5: COMPACT NESTED TABLE -->
+            <tr>
+                <td>
+                    <span class="section-title">🛠️ Participatory Learning</span>
+                    <table class="nested-table" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th style="width:10%;">Time (min)</th>
+                                <th style="width:30%;">Trainer Activities</th>
+                                <th style="width:30%;">Trainee Activities</th>
+                                <th style="width:30%;">Learning Aids/Materials</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data Rows for Compact Nested Table -->
+                            <tr>
+                                <td style="height: 30px;">&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- ROW 6: Post-Assessment -->
+            <tr>
+                <td>
+
+                    Post-Assessment: <span class="blank-line" style="width: 15%;"></span> minutes
+                </td>
+            </tr>
+
+            <!-- ROW 7: Summary/Closure -->
+            <tr>
+                <td>
+
+                    Summary/Closure: <span class="blank-line" style="width: 15%;"></span> minutes
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+</html>

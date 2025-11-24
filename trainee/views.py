@@ -20,6 +20,7 @@ from django.http import JsonResponse
 from datetime import datetime
 from django.contrib import messages
 import re, random
+from django.contrib.auth import logout
 
 # imports to handle the login loggic
 from django.contrib.auth import login, authenticate
@@ -1826,3 +1827,4 @@ def portfolio_shared(request, token):
     
     except PortfolioShare.DoesNotExist:
         raise Http404("Invalid share link")
+    

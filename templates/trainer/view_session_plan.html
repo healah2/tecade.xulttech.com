@@ -1,0 +1,213 @@
+{% extends 'trainer/trainer_base.html' %}
+{% load static %}
+
+{% block title %}Tecade | Session Plan{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+
+<style>
+    .main-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .main-table th {
+        background-color: #eff1f5 !important;
+        color: rgb(14, 13, 13);
+        font-size: 30px;
+        text-align: center;
+        padding: 20px !important;
+    }
+
+    .main-table td {
+        background: white;
+        padding: 20px !important;
+        font-size: 16px;
+    }
+
+    .nested-table th {
+        background-color: #e2e8f0 !important;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .nested-table td {
+        background-color: #fff !important;
+    }
+
+    .section-title {
+        font-weight: bold;
+        color: #2c5282;
+        margin-bottom: 10px;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <!-- PAGE HEADER -->
+    <section class="content-header">
+        <h1 style="display:inline-block;">
+            Session Plan
+        </h1>
+        <div class="no-print" style="float:right;">
+            <button onclick="window.print()" class="btn btn-default">
+                <i class="fa fa-print"></i> Print
+            </button>
+        </div>
+    </section>
+
+    <section class="content">
+
+        <!-- HEADER BOX -->
+        <div class="box box-primary">
+            <div style="text-align:center; margin-bottom:20px; padding-bottom:10px;">
+                <h2 style="margin:0; font-weight:bold;">TECADE INSTITUTIONAL MANAGEMENT SYSTEM</h2>
+                <p style="margin:2px 0;">
+                    P.O Box 1316-50100, Kakamega • Email:
+                    <a href="mailto:info@tecade.ac.ke">info@tecade.ac.ke</a> • Phone: 0739922223
+                </p>
+                <p style="margin:2px 0;">
+                    Website: <a href="http://www.tecade.ac.ke" target="_blank">www.tecade.ac.ke</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- MAIN TABLE (Your original structure) -->
+        <div class="box box-primary">
+            <div class="box-body">
+                <table class="table table-bordered main-table">
+
+                    <!-- ROW 1 -->
+                    <thead>
+                        <tr>
+                            <th>Session Plan</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <!-- SESSION INFO -->
+                        <tr>
+                            <td>
+                                <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 18px;
+            gap: 20px;
+        ">
+                                    <div><strong>Session Plan Title:</strong> {{ plan.session_title }}</div>
+                                    <div><strong>Duration:</strong> {{ plan.duration }} min</div>
+                                    <div><strong>Date:</strong> {{ plan.date }}</div>
+                                    <div><strong>Presenter:</strong> {{ plan.presenter_name }}</div>
+                                </div>
+                            </td>
+                        </tr>
+
+
+                        <!-- BRIDGE IN -->
+                        <tr>
+                            <td>
+                                <strong>Bridge-in:</strong> {{ plan.bridge_in }} minutes
+                                <br><br>
+                                <em style="color:#555;">/* Use any one of Active Learning strategies */</em>
+                            </td>
+                        </tr>
+
+                        <!-- LEARNING EXPECTATIONS -->
+                        <tr>
+                            <td>
+                                <span class="section-title">Learning Outcomes</span>
+                                <strong>By the end of the session, the trainee will:</strong>
+                                <ul>
+                                    {% for exp in plan.expectation.splitlines %}
+                                    <li>{{ exp }}</li>
+                                    {% empty %}
+                                    <li>No expectations saved.</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+
+                        <!-- PRE-ASSESSMENT -->
+                        <tr>
+                            <td>
+                                <strong>Pre-assessment:</strong> {{ plan.pre_assessment }} minutes
+                            </td>
+                        </tr>
+
+                        <!-- PARTICIPATORY LEARNING -->
+                        <tr>
+                            <td>
+                                <span class="section-title">🛠️ Participatory Learning</span>
+
+                                <table class="table table-bordered nested-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:10%;">Time (min)</th>
+                                            <th style="width:30%;">Trainer Activities</th>
+                                            <th style="width:30%;">Trainee Activities</th>
+                                            <th style="width:30%;">Learning Aids/Materials</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if participatory_rows %}
+                                        {% for time, trainer, trainee, resource in participatory_rows %}
+                                        <tr>
+                                            <td>{{ time }}</td>
+                                            <td>{{ trainer }}</td>
+                                            <td>{{ trainee }}</td>
+                                            <td>{{ resource }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="4" style="text-align:center;">No participatory learning
+                                                activities</td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- POST-ASSESSMENT -->
+                        <tr>
+                            <td>
+                                <strong>Post-Assessment:</strong> {{ plan.post_assessment }} minutes
+                            </td>
+                        </tr>
+
+                        <!-- SUMMARY -->
+                        <tr>
+                            <td>
+                                <strong>Summary/Closure:</strong> {{ plan.summary }} minutes
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+{% endblock %}

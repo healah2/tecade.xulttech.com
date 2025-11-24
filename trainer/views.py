@@ -13,7 +13,12 @@ import os, tempfile
 from django.shortcuts import render, redirect
 from django.utils.html import escape
 from bs4 import BeautifulSoup
-from .models import LearningGuide
+from django.shortcuts import render
+from django.utils.timezone import now
+import json
+import google.generativeai as genai
+from django.shortcuts import render, get_object_or_404
+
 
 
 def iter_block_items(parent):
@@ -149,15 +154,6 @@ def clean_html_with_bs4(html_content):
     return str(soup)
 
 
-from django.shortcuts import render
-from django.utils.timezone import now
-import json
-import google.generativeai as genai
-
-import json
-import google.generativeai as genai
-from django.shortcuts import render
-
 def generate_learning_plan(request):
     GEMINI_API_KEY = "AIzaSyCgO3JupI-_EA1R4q5JGPTypvdFHfK9NBQ"
     genai.configure(api_key=GEMINI_API_KEY)
@@ -171,7 +167,6 @@ def generate_learning_plan(request):
         Return a valid JSON object with the keys:
         trainer_activities, trainee_activities, resources, assessments
         """
-
         def normalize(value):
             if isinstance(value, list):
                 if all(isinstance(v, dict) for v in value):
@@ -272,9 +267,7 @@ def generate_learning_plan(request):
 
         sessions = []
 
-        # -------------------------------
         # Week 1: Reporting and Admission
-        # -------------------------------
         sessions.append({
             "week": 1,
             "session_no": "",
@@ -286,16 +279,12 @@ def generate_learning_plan(request):
             "special": True
         })
 
-        # -------------------------------
         # Generate normal sessions & insert assessment dynamically
-        # -------------------------------
         if total_expectations > 0:
             base_count = total_expectations // sessions_to_create
             remainder = total_expectations % sessions_to_create
             ptr = 0
-            current_week = 2  # start actual teaching from week 2
-
-            # track outcome numbering
+            current_week = 2
             outcome_seen = {}
             outcome_number = 0
 
@@ -307,7 +296,6 @@ def generate_learning_plan(request):
                 expectations_for_session = [c["expectation"] for c in chunk]
                 outcome_title = chunk[0]["title"] if chunk else f"Outcome {s_idx+1}"
 
-                # assign outcome number only first time we see it
                 if outcome_title not in outcome_seen:
                     outcome_number += 1
                     outcome_seen[outcome_title] = outcome_number
@@ -320,17 +308,15 @@ def generate_learning_plan(request):
                     "session_no": session_no,
                     "title": f"Session {session_no}",
                     "learning_outcome": outcome_title,
-                    "outcome_no": outcome_seen[outcome_title],  # ✅ numbered outcome
+                    "outcome_no": outcome_seen[outcome_title],
                     "expectations": expectations_for_session,
                     **ai_data,
                     "special": False
                 })
 
-                # Increment week normally
                 if session_no % SESSIONS_PER_WEEK == 0:
                     current_week += 1
 
-                # Insert assessment inline after interval
                 if (current_week - 1) % ASSESSMENT_INTERVAL_WEEKS == 0 and (
                     session_no % SESSIONS_PER_WEEK == 0 or ptr == total_expectations
                 ):
@@ -344,11 +330,27 @@ def generate_learning_plan(request):
                         "assessments": [],
                         "special": True
                     })
-                    current_week += 1  # skip a week after assessment
+                    current_week += 1
 
         # -------------------------------
-        # Context for template
+        # Save generated guide in DB
         # -------------------------------
+        guide = LearningGuide.objects.create(
+            unit_code=unit_code,
+            unit_competence=unit_competence,
+            trainer_name=trainer_name,
+            course=course,
+            institution=institution,
+            level=level,
+            date_preparation=date_preparation or None,
+            date_revision=date_revision or None,
+            term=term,
+            trainees=trainees,
+            class_name=class_name,
+            total_time=total_time,
+            sessions_json=sessions
+        )
+
         context = {
             "unit_competence": unit_competence,
             "unit_code": unit_code,
@@ -365,6 +367,7 @@ def generate_learning_plan(request):
             "total_sessions": total_sessions,
             "sessions_created": len(sessions),
             "sessions": sessions,
+            "guide_saved": True  # Flag to auto-display success
         }
 
         return render(request, "trainer/learning_plan.html", context)
@@ -374,15 +377,191 @@ def generate_learning_plan(request):
 
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import LearningGuide
+
+
+
 
 def learning_guides_list(request):
     guides = LearningGuide.objects.all()
     return render(request, "trainer/learning_guides_list.html", {"guides": guides})
 
+import json
+from django.shortcuts import render, get_object_or_404
+from .models import LearningGuide
+
+import ast
+from django.shortcuts import get_object_or_404, render
+
 def view_learning_guide(request, pk):
     guide = get_object_or_404(LearningGuide, pk=pk)
-    return render(request, "trainer/view_learning_guide.html", {"guide": guide})
+
+    # Convert string representation of list to Python list
+    if guide.sessions_json:
+        try:
+            sessions = ast.literal_eval(guide.sessions_json)
+        except Exception as e:
+            sessions = []
+            print("Error parsing sessions_json:", e)
+    else:
+        sessions = []
+
+    return render(request, "trainer/view_learning_plan.html", {
+        "guide": guide,
+        "sessions": sessions
+    })
+
+import ast
+import json
+from django.shortcuts import get_object_or_404, render, redirect
+from .models import LearningGuide, SavedSessionPlan
+
+def generate_session_plan(request):
+    guides = LearningGuide.objects.all()
+
+    # Prepare units dropdown
+    units = []
+    for guide in guides:
+        if guide.unit_competence:
+            try:
+                sessions = ast.literal_eval(guide.sessions_json or "[]")
+            except Exception as e:
+                print("Error parsing sessions_json for guide", guide.id, e)
+                sessions = []
+
+            units.append({
+                'id': guide.id,
+                'unit_competence': guide.unit_competence,
+                'sessions': sessions
+            })
+
+    # Selected guide for AJAX reload
+    selected_guide_id = request.GET.get('unit_id')
+    selected_sessions = []
+
+    if selected_guide_id:
+        guide = get_object_or_404(LearningGuide, id=selected_guide_id)
+
+        try:
+            sessions = ast.literal_eval(guide.sessions_json or "[]")
+        except Exception as e:
+            print("Error parsing sessions_json:", e)
+            sessions = []
+
+        for s in sessions:
+            if not s.get('special', False):
+                selected_sessions.append({
+                    'title': s.get('title', ''),
+                    'expectations': json.dumps(s.get('expectations', [])),  # <-- JSON encode
+                    'trainer_activities': s.get('trainer_activities', []),
+                    'trainee_activities': s.get('trainee_activities', []),
+                    'resources': s.get('resources', [])
+                })
+
+    # ----------------------------------------------------------
+    # SAVE SESSION PLAN
+    # ----------------------------------------------------------
+    if request.method == 'POST':
+        guide_id = request.POST.get('unit_id')
+        session_title = request.POST.get('session_title')
+        presenter_name = request.POST.get('presenter_name')
+        date = request.POST.get('date')
+        duration = request.POST.get('duration')
+        bridge_in = request.POST.get('bridge_in')
+        pre_assessment = request.POST.get('pre_assessment')
+        post_assessment = request.POST.get('post_assessment')
+        summary = request.POST.get('summary')
+        time = request.POST.getlist('time[]')
+
+        # MULTIPLE EXPECTATIONS
+        expectations = request.POST.getlist('expectation[]')
+        expectation_str = "\n".join([e.strip() for e in expectations if e.strip()])
+
+        # Activity Lists
+        trainer_activities = request.POST.getlist('trainer_activities[]')
+        trainee_activities = request.POST.getlist('trainee_activities[]')
+        resources = request.POST.getlist('resources[]')
+
+        # Clean strings
+        trainer_str = '\n'.join([t.strip() for t in trainer_activities if t.strip()])
+        trainee_str = '\n'.join([t.strip() for t in trainee_activities if t.strip()])
+        resources_str = '\n'.join([r.strip() for r in resources if r.strip()])
+        time_str = '\n'.join([ti.strip() for ti in time if ti.strip()])
+
+        guide = get_object_or_404(LearningGuide, id=guide_id)
+
+        SavedSessionPlan.objects.create(
+            unit=guide,
+            session_title=session_title,
+            presenter_name=presenter_name,
+            date=date,
+            duration=duration,
+            bridge_in=bridge_in,
+            pre_assessment=pre_assessment,
+            post_assessment=post_assessment,
+            summary=summary,
+            expectation=expectation_str,
+            time=time_str,
+            trainer_activities=trainer_str,
+            trainee_activities=trainee_str,
+            resources=resources_str
+        )
+
+        return redirect("session_plans_list")
+
+    return render(request, 'trainer/generate_session_plan.html', {
+        'guides': guides,
+        'units': units,
+        'selected_sessions': selected_sessions,
+        'selected_guide_id': selected_guide_id
+    })
+
+
+
+def session_plans_list(request):
+    plans = SavedSessionPlan.objects.select_related('unit').all().order_by('-date')
+    return render(request, 'trainer/session_plans_list.html', {'plans': plans})
+
+
+def view_session_plan(request, plan_id):
+    plan = get_object_or_404(SavedSessionPlan, id=plan_id)
+
+    trainer_activities = plan.trainer_activities.splitlines() if plan.trainer_activities else []
+    trainee_activities = plan.trainee_activities.splitlines() if plan.trainee_activities else []
+    resources = plan.resources.splitlines() if plan.resources else []
+    time = plan.time.splitlines() if plan.time else []
+
+    # Split expectations too (NEW)
+    expectations = plan.expectation.splitlines() if plan.expectation else []
+
+    participatory_rows = list(zip(time, trainer_activities, trainee_activities, resources))
+
+    return render(request, 'trainer/view_session_plan.html', {
+        'plan': plan,
+        'participatory_rows': participatory_rows,
+        'expectations': expectations
+    })
+
+
+
+def sp(request):
+    return render(request, 'trainer/sp.html')
+
+
+def session_plan(request, session_no):
+    # For simplicity, assume one guide; otherwise filter by course/unit/etc.
+    guide = get_object_or_404(LearningGuide, pk=1)  
+
+    # Parse sessions JSON
+    sessions = guide.sessions  # uses the property you defined
+
+    # Find the specific session by session_no
+    session = next((s for s in sessions if s.get('session_no') == session_no), None)
+
+    if not session:
+        return render(request, 'session_not_found.html', {'session_no': session_no})
+
+    return render(request, 'session_plan.html', {'session': session})
+
+
 
 

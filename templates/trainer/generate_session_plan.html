@@ -1,0 +1,220 @@
+{% extends 'trainer/trainer_base.html' %}
+{% load static %}
+{% block title %}Tecade | Generate Session Plan{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>Generate Session Plan</h1>
+    </section>
+
+    <section class="content">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Session Details</h3>
+                </div>
+
+                <div class="box-body">
+
+                    <!-- Row 1 -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Unit of Competence</label>
+                            <select name="unit_id" id="unit_id" class="form-control" required>
+                                <option value="">Select Unit</option>
+                                {% for unit in units %}
+                                <option value="{{ unit.id }}">{{ unit.unit_competence }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Session Title</label>
+                            <select name="session_title" id="session_title" class="form-control" required>
+                                <option value="">Select Session</option>
+                                {% for session in selected_sessions %}
+                                <option value="{{ session.title }}" data-expectations='{{ session.expectations|safe }}'
+                                    data-trainer="{{ session.trainer_activities|join:'||'|escapejs }}"
+                                    data-trainee="{{ session.trainee_activities|join:'||'|escapejs }}"
+                                    data-resources="{{ session.resources|join:'||'|escapejs }}">
+                                    {{ session.title }}
+                                </option>
+
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Duration (min)</label>
+                            <input type="number" name="duration" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Date</label>
+                            <input type="date" name="date" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Presenter Name</label>
+                            <input type="text" name="presenter_name" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Bridge-in -->
+                    <div class="form-group">
+                        <label>Bridge-in (minutes)</label>
+                        <input type="text" name="bridge_in" class="form-control">
+                        <small><i>Use any one of Active learning strategies here</i></small>
+                    </div>
+
+                    <!-- EXPECTATIONS -->
+                    <div class="form-group">
+                        <label>Learning Expectations (auto-filled)</label>
+                        <div id="expectation_container"></div>
+                    </div>
+
+                    <!-- Pre-assessment -->
+                    <div class="form-group">
+                        <label>Pre-assessment (minutes)</label>
+                        <input type="text" name="pre_assessment" class="form-control">
+                    </div>
+
+                    <hr>
+
+                    <h4>Participatory Learning</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="participatory_table">
+                            <thead style="background: #f4f4f4;">
+                                <tr>
+                                    <th style="width: 100px;">Time (min)</th>
+                                    <th>Trainer Activities</th>
+                                    <th>Trainee Activities</th>
+                                    <th>Learning Aids/Materials</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group">
+                        <label>Post-Assessment (minutes)</label>
+                        <input type="text" name="post_assessment" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Summary/Closure (minutes)</label>
+                        <input type="text" name="summary" class="form-control">
+                    </div>
+
+                </div>
+
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary">Generate Plan</button>
+                </div>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+
+<script>
+    const unitSelect = document.getElementById('unit_id');
+    const sessionSelect = document.getElementById('session_title');
+    const expectationContainer = document.getElementById('expectation_container');
+    const participatoryTable = document.querySelector('#participatory_table tbody');
+
+    // Reload page with selected unit
+    unitSelect.addEventListener('change', function () {
+        if (this.value) {
+            window.location.href = `?unit_id=${this.value}`;
+        }
+    });
+
+    // Load session data into form
+    sessionSelect.addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+
+        // ---------------------------
+        // HANDLE MULTIPLE EXPECTATIONS
+        // ---------------------------
+        expectationContainer.innerHTML = "";
+        let expectations = [];
+
+        try {
+            expectations = JSON.parse(selected.dataset.expectations || "[]");
+        } catch {
+            expectations = [];
+        }
+
+        expectations.forEach(exp => {
+            expectationContainer.innerHTML += `
+                <textarea name="expectation[]" class="form-control" rows="2" readonly>${exp}</textarea><br>
+            `;
+        });
+
+        // ---------------------------
+        // PARTICIPATORY LEARNING
+        // ---------------------------
+        participatoryTable.innerHTML = "";
+
+        const trainers = (selected.dataset.trainer || '').split('||').filter(x => x.trim() !== "");
+        const trainees = (selected.dataset.trainee || '').split('||').filter(x => x.trim() !== "");
+        const resources = (selected.dataset.resources || '').split('||').filter(x => x.trim() !== "");
+
+        const maxRows = Math.max(trainers.length, trainees.length, resources.length);
+
+        for (let i = 0; i < maxRows; i++) {
+            const t_trainer = trainers[i] || "";
+            const t_trainee = trainees[i] || "";
+            const t_resource = resources[i] || "";
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" name="time[]" class="form-control" style="width:90px;"></td>
+                <td><input type="text" name="trainer_activities[]" class="form-control" value="${t_trainer}"></td>
+                <td><input type="text" name="trainee_activities[]" class="form-control" value="${t_trainee}"></td>
+                <td><input type="text" name="resources[]" class="form-control" value="${t_resource}"></td>
+            `;
+            participatoryTable.appendChild(row);
+        }
+    });
+
+    // Keep selected unit after reload
+    const params = new URLSearchParams(window.location.search);
+    const selectedUnitId = params.get("unit_id");
+    if (selectedUnitId) {
+        unitSelect.value = selectedUnitId;
+    }
+</script>
+{% endblock %}

@@ -18,7 +18,7 @@
 
         <header class="main-header">
             <!-- Logo -->
-            <a href="index2.html" class="logo">
+            <a href="/" class="logo">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
                 <span class="logo-mini"><b>Te</b>CADE</span>
                 <!-- logo for regular state and mobile devices -->
@@ -306,11 +306,11 @@
                         </a>
                     </li>
 
-                    <li>
+                    <!-- <li>
                         <a href="{% url 'trainee_registration' %}">
                             <i class="fa fa-user-plus"></i> <span>Register Trainee</span>
                         </a>
-                    </li>
+                    </li> -->
 
                     <li class="treeview">
                         <a href="#">
@@ -325,13 +325,18 @@
                             </li>
                             <li>
                                 <a href="{% url 'learning_guides_list' %}">
-                                    <i class="fa fa-plus-circle"></i> Learning Plans
+                                    <i class="fa fa-eye"></i> Learning Plans
                                 </a>
                             </li>
 
                             <li>
-                                <a href="#">
-                                    <i class="fa fa-eye"></i> Generate Session Plan
+                                <a href="{% url 'generate_session_plan' %}">
+                                    <i class="fa fa-plus-circle"></i> Generate Session Plan
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'session_plans_list' %}">
+                                    <i class="fa fa-eye"></i> Session Plans
                                 </a>
                             </li>
                         </ul>
@@ -395,14 +400,14 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'admin_logout' %}">
+                        <a href="#">
                             <i class="fa fa-sign-out"></i> <span>Logout</span>
                         </a>
                     </li>
 
 
                     <li>
-                        <a href="/login/">
+                        <a href="{% url 'admin_logout' %}">
                             <i class=""></i> <span>Go to Admin Portal</span>
                         </a>
                     </li>

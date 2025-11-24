@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AdminIndex, CarouselSlide, AdminAbout, AdminInstitutionalManagement, AdminBom, AdminAcDpt,AdminNonAcDpt, Department, Course, Trainee, AdminCredentials, TraineeSession, Timetable, Session
+from .models import AdminIndex, CarouselSlide, AdminAbout, AdminInstitutionalManagement, AdminBom, AdminAcDpt,AdminNonAcDpt, Department, Course, Trainee, AdminCredentials, TraineeSession, Timetable, Session, TrainerOtherDocument
 
 class CarouselSlideInline(admin.TabularInline):
     model = CarouselSlide
@@ -100,3 +100,9 @@ class TrainerDataAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name',  'department')
     search_fields = ('first_name', 'last_name', 'department__name')
     list_filter = ('department',)
+
+@admin.register(TrainerOtherDocument)
+class TrainerOtherDocumentAdmin(admin.ModelAdmin):
+    list_display = ('trainer', 'document')
+    search_fields = ('trainer', 'document')
+    list_filter = ('trainer', 'document')

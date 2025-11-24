@@ -1,0 +1,194 @@
+{% extends 'trainer/trainer_base.html' %}
+{% load static %}
+
+{% block title %}Tecade | View Learning Guide{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1 style="display: inline-block;">
+            Learning Plan
+            <small>{{ guide.course }} - {{ guide.level }}</small>
+        </h1>
+        <div class="no-print" style="float: right; margin-top: 5px;">
+            <button onclick="window.print()" class="btn btn-default">
+                <i class="fa fa-print"></i> Print
+            </button>
+        </div>
+    </section>
+
+    <section class="content">
+        <!-- Header -->
+        <div class="box box-primary">
+            <div style="text-align: center; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="margin: 0; font-weight: bold;">TECADE INSTITUTIONAL MANAGEMENT SYSTEM</h2>
+                <p style="margin: 2px 0;">
+                    P.O Box 1316-50100, Kakamega, E-mail:
+                    <a href="mailto:info@tecade.ac.ke">info@tecade.ac.ke</a>,
+                    Mobile Phone: 0739922223
+                </p>
+                <p style="margin: 2px 0;">
+                    Website: <a href="http://www.tecade.ac.ke" target="_blank">www.tecade.ac.ke</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Metadata Table -->
+        <div class="box box-primary">
+            <div class="box-body">
+                <table class="table table-bordered" style="width:100%; border-collapse: collapse;">
+                    <tbody>
+                        <tr>
+                            <th style="width: 25%;">Unit of Competence</th>
+                            <td colspan="3">{{ guide.unit_competence }}</td>
+                        </tr>
+                        <tr>
+                            <th>Unit Code</th>
+                            <td>{{ guide.unit_code }}</td>
+                            <th>Name of Trainer</th>
+                            <td>{{ guide.trainer_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Course</th>
+                            <td>{{ guide.course }}</td>
+                            <th>Institution</th>
+                            <td>{{ guide.institution }}</td>
+                        </tr>
+                        <tr>
+                            <th>Level</th>
+                            <td>{{ guide.level }}</td>
+                            <th>Term</th>
+                            <td>{{ guide.term }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date of Preparation</th>
+                            <td>{{ guide.date_preparation }}</td>
+                            <th>Date of Revision</th>
+                            <td>{{ guide.date_revision }}</td>
+                        </tr>
+                        <tr>
+                            <th>Number of Trainees</th>
+                            <td>{{ guide.trainees }}</td>
+                            <th>Class</th>
+                            <td>{{ guide.class_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Time (hrs)</th>
+                            <td colspan="3">{{ guide.total_time }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sessions Table -->
+
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Learning Plan</h3>
+            </div>
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Week</th>
+                            <th>Session No.</th>
+                            <th>Session Title</th>
+                            <th>Learning Expectations</th>
+                            <th>Trainer Activities</th>
+                            <th>Trainee Activities</th>
+                            <th>Resources & Refs</th>
+                            <th>Learning Checks/Assessments</th>
+                            <th>Reflections & Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                        {% if session.special %}
+                        <tr class="bg-info">
+                            <td colspan="9" style="text-align:center; font-weight:bold;" href="#">
+                                {{ session.title }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        {% ifchanged session.learning_outcome %}
+                        <tr class="bg-success">
+                            <td colspan="9" style="font-weight:bold; text-align:center;">
+                                Learning Outcome {{ session.outcome_no }}: {{ session.learning_outcome }}
+                            </td>
+                        </tr>
+                        {% endifchanged %}
+
+                        <tr>
+                            <td>{{ session.week }}</td>
+                            <td>{{ session.session_no }}</td>
+                            <td>{{ session.title }}</td>
+
+                            <td>
+                                <ul style="margin:0; padding-left:15px;">
+                                    {% for exp in session.expectations %}
+                                    <li>{{ exp }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+
+                            <td>
+                                <ul style="margin:0; padding-left:15px;">
+                                    {% for act in session.trainer_activities %}
+                                    <li>{{ act }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+
+                            <td>
+                                <ul style="margin:0; padding-left:15px;">
+                                    {% for act in session.trainee_activities %}
+                                    <li>{{ act }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+
+                            <td>
+                                <ul style="margin:0; padding-left:15px;">
+                                    {% for res in session.resources %}
+                                    <li>{{ res }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+
+                            <td>
+                                <ul style="margin:0; padding-left:15px;">
+                                    {% for a in session.assessments %}
+                                    <li>{{ a }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+
+                            <td></td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+<script src="{% static 'dist/js/app.min.js' %}"></script>
+<script src="{% static 'dist/js/demo.js' %}"></script>
+{% endblock %}

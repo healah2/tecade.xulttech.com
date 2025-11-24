@@ -1146,7 +1146,7 @@ def add_department(request):
             code=code,
             date_registered=date_registered
         )
-        return redirect('all_departments')  # Replace with your list view name
+        return redirect('all_departments_dpac')  # Replace with your list view name
 
     return render(request, 'dp_academics/add_department.html')
 
@@ -1202,68 +1202,72 @@ def dp_academics_dashboard(request):
         return redirect('admin_login')
     return render(request, 'dp_academics/dp_academics_dashboard.html')
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Department, Course
+from .models import TrainerData, Department, TrainerOtherDocument
 
 def trainer_registration(request):
     departments = Department.objects.all()
-    courses = Course.objects.all()  # Used only if you want all courses initially
 
     if request.method == "POST":
-        # Personal Info
-        first_name = request.POST.get('first_name')
-        middle_name = request.POST.get('middle_name', '')
-        last_name = request.POST.get('last_name')
-        gender = request.POST.get('gender')
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-        passport_image = request.FILES.get('passport_image')
+        try:
+            # Single file uploads
+            passport_image = request.FILES.get("passport_image")
+            tertiary_certificate = request.FILES.get("tertiary_certificate")
+            o_level_certificate = request.FILES.get("o_level_certificate")
+            secondary_certificate = request.FILES.get("secondary_certificate")
 
-        # Department
-        department_id = request.POST.get('department')
-        department = Department.objects.get(id=department_id) if department_id else None
+            # Multiple files upload for 'Others'
+            other_documents = request.FILES.getlist("other_documents")
 
-        # Courses (comma-separated string from hidden input)
-        course_ids_str = request.POST.get('courses', '')  # e.g., "1,3,5"
-        course_ids = course_ids_str.split(',') if course_ids_str else []
-        selected_courses = Course.objects.filter(id__in=course_ids)
+            # Create TrainerData instance
+            trainer = TrainerData(
+                passport_image=passport_image,
+                first_name=request.POST.get("first_name"),
+                middle_name=request.POST.get("middle_name"),
+                last_name=request.POST.get("last_name"),
+                gender=request.POST.get("gender"),
+                dob=request.POST.get("dob"),
 
-        # Qualifications
-        highest_education = request.POST.get('highest_education', '')
-        certificates = request.POST.get('certificates', '')
+                employer=request.POST.get("employer"),
+                staff_number=request.POST.get("staff_number"),
+                id_number=request.POST.get("id_number"),
+                phone=request.POST.get("phone"),
 
-        # Residential info
-        county = request.POST.get('county', '')
-        sub_county = request.POST.get('sub_county', '')
-        town = request.POST.get('town', '')
+                first_appointment=request.POST.get("first_appointment"),
+                current_appointment=request.POST.get("current_appointment"),
+                department_id=request.POST.get("department"),
 
-        # Create Trainer
-        trainer = TrainerData.objects.create(
-            first_name=first_name,
-            middle_name=middle_name,
-            last_name=last_name,
-            gender=gender,
-            phone=phone,
-            email=email,
-            passport_image=passport_image,
-            department=department,
-            highest_education=highest_education,
-            certificates=certificates,
-            county=county,
-            sub_county=sub_county,
-            town=town
-        )
+                current_jg=request.POST.get("current_jg"),
+                courses=request.POST.get("courses"),
+                special_responsibilities=request.POST.get("special_responsibilities"),
 
-        # Add Many-to-Many courses
-        trainer.courses.set(selected_courses)
-        trainer.save()
+                kin_name=request.POST.get("kin_name"),
+                kin_phone=request.POST.get("kin_phone"),
+                kin_address=request.POST.get("kin_address"),
+                kin_email=request.POST.get("kin_email"),
 
-        messages.success(request, f"Trainer {trainer.first_name} {trainer.last_name} registered successfully!")
-        return redirect('trainer_registration')
+                # Academic docs
+                tertiary_certificate=tertiary_certificate,
+                o_level_certificate=o_level_certificate,
+                secondary_certificate=secondary_certificate,
+            )
 
-    context = {
-        'departments': departments,
-        'courses': courses
-    }
-    return render(request, 'dp_academics/staff_reg.html', context)
+            trainer.save()
+
+            # Save multiple "Other" documents
+            for doc in other_documents:
+                if doc:
+                    TrainerOtherDocument.objects.create(trainer=trainer, document=doc)
+
+            # Success message
+            messages.success(request, "Trainer registered successfully ✅")
+
+            return redirect("trainer_registration")
+
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)} ❌")
+            return redirect("trainer_registration")
+
+    return render(request, "dp_admin/staff_reg.html", {"departments": departments})
+
+
+
